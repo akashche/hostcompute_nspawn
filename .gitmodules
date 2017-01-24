@@ -1,0 +1,30 @@
+[submodule "cmake"]
+	path = cmake
+	url = https://github.com/staticlibs/cmake.git
+[submodule "deps/external_jansson"]
+	path = deps/external_jansson
+	url = https://github.com/staticlibs/external_jansson.git
+[submodule "deps/external_popt"]
+	path = deps/external_popt
+	url = https://github.com/staticlibs/external_popt.git
+[submodule "deps/staticlib_config"]
+	path = deps/staticlib_config
+	url = https://github.com/staticlibs/staticlib_config.git
+[submodule "deps/staticlib_io"]
+	path = deps/staticlib_io
+	url = https://github.com/staticlibs/staticlib_io.git
+[submodule "deps/staticlib_ranges"]
+	path = deps/staticlib_ranges
+	url = https://github.com/staticlibs/staticlib_ranges.git
+[submodule "deps/staticlib_utils"]
+	path = deps/staticlib_utils
+	url = https://github.com/staticlibs/staticlib_utils.git
+[submodule "deps/staticlib_serialization"]
+	path = deps/staticlib_serialization
+	url = https://github.com/staticlibs/staticlib_serialization.git
+[submodule "deps/staticlib_pimpl"]
+	path = deps/staticlib_pimpl
+	url = https://github.com/staticlibs/staticlib_pimpl.git
+[submodule "deps/staticlib_tinydir"]
+	path = deps/staticlib_tinydir
+	url = https://github.com/staticlibs/staticlib_tinydir.git

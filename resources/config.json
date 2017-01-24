@@ -1,0 +1,8 @@
+{
+    "process_directory": "C:/projects/hostcompute_nspawn/test",
+    "process_executable": "C:/windows/system32/cmd.exe",
+    "process_arguments": ["C:/test/test.bat"],
+
+    "parent_layer_directory": "C:/ProgramData/docker/windowsfilter/c889dc67d89b23186c943dadaa8ec4bbabd090a9dcfeffea99b61107f7433604"
+
+}
