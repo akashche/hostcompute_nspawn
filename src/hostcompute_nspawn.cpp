@@ -21,6 +21,8 @@
 #include "ContainerConfig.hpp"
 #include "ContainerId.hpp"
 #include "ContainerLayer.hpp"
+#include "ProcessConfig.hpp"
+
 
 namespace { // anonymous 
 
@@ -203,11 +205,11 @@ void spawn_and_wait(const NSpawnConfig& config) {
     for (auto& la : acsendant_layers) {
         alpass.emplace_back(la.clone());
     }
-    auto container_config = ContainerConfig(base_path, volume_path, layer.clone(),
-            std::move(alpass), rng.generate(8));
     HANDLE computeSystem = nullptr;
 
     { // create container
+        auto container_config = ContainerConfig(base_path, volume_path, layer.clone(),
+                std::move(alpass), rng.generate(8));
         std::wstring wname = su::widen(layer.get_name());
         std::string conf = ss::dump_json_to_string(container_config.to_json());
         std::wstring wconf = su::widen(conf);
@@ -223,7 +225,7 @@ void spawn_and_wait(const NSpawnConfig& config) {
         std::cout << "Container created, name: [" << layer.get_name() << "]" << std::endl;
     }
 
-    HANDLE cs_callback_handle;
+    HANDLE cs_callback_handle = nullptr;
     CallbackLatch cs_latch;
     auto cs_callback = [](uint32_t notificationType, void* context, int32_t notificationStatus, wchar_t* notificationData) {
         std::string data = nullptr != notificationData ? su::narrow(notificationData) : "";
@@ -273,6 +275,42 @@ void spawn_and_wait(const NSpawnConfig& config) {
         }
         cs_latch.await(NotificationType::SYSTEM_START_COMPLETE);
         std::cout << "Container started, name: [" << layer.get_name() << "]" << std::endl;
+    }
+
+    HANDLE process = nullptr;
+
+    { // start process
+        auto pcfg = ProcessConfig("");
+        std::string pcfg_json = ss::dump_json_to_string(pcfg.to_json());
+        std::wstring wpcfg_json = su::widen(pcfg_json);
+        HCS_PROCESS_INFORMATION hpi;
+        std::memset(std::addressof(hpi), '\0', sizeof(HCS_PROCESS_INFORMATION));
+        wchar_t* result = nullptr;
+        auto res = ::HcsCreateProcess(computeSystem, wpcfg_json.c_str(), std::addressof(hpi),
+                std::addressof(process), std::addressof(result));
+        if (0 != res) {
+            throw NSpawnException(TRACEMSG("'HcsCreateProcess' failed," +
+                " config: [" + pcfg_json + "]," +
+                " error: [" + su::errcode_to_string(res) + "]"));
+        }
+        std::cout << "Process created" << std::endl;
+    }
+
+    HANDLE process_callback_handle;
+    CallbackLatch process_latch;
+
+    { // process callback
+        cs_latch.lock();
+        auto res = ::HcsRegisterProcessCallback(process, cs_callback, std::addressof(cs_latch), std::addressof(process_callback_handle));
+        if (0 == res) {
+            std::cout << "Process callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
+            cs_latch.await(NotificationType::PROCESS_EXIT);
+            std::cout << "Process create latch unlocked" << std::endl;
+        }
+        else {
+            std::cerr << "ERROR: 'HcsRegisterProcessCallback' failed, name: [" << layer.get_name() << "]" <<
+                " error: [" << su::errcode_to_string(res) << "]" << std::endl;
+        }
     }
 
     { // terminate

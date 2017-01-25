@@ -54,6 +54,7 @@ add_executable ( ${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContainerLayer.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/NSpawnConfig.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/NSpawnException.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/ProcessConfig.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/utils.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/vmcompute.hpp
         # resources

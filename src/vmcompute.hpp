@@ -45,6 +45,15 @@ typedef struct _WC_LAYER_DESCRIPTOR {
     PCWSTR Path;
 } WC_LAYER_DESCRIPTOR;
 
+typedef struct _HCS_PROCESS_INFORMATION {
+    uint32_t ProcessId;
+    uint32_t Reserved;
+
+    HANDLE StdInput;
+    HANDLE StdOutput;
+    HANDLE StdError;
+} HCS_PROCESS_INFORMATION;
+
 typedef void(*HcsNotificationCallback_type)(uint32_t notificationType, void* context, int32_t notificationStatus, wchar_t* notificationData);
 
 uint32_t HcsEnumerateComputeSystems(const wchar_t* query, wchar_t** computeSystems, wchar_t** result);
@@ -58,11 +67,11 @@ uint32_t HcsRegisterComputeSystemCallback(HANDLE computeSystem, HcsNotificationC
 uint32_t HcsTerminateComputeSystem(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
 
 
-//uint32_t HcsCreateProcess(HANDLE computeSystem, const wchar_t* processParameters, TODO processInformation, TODO process , wchar_t** result)
+uint32_t HcsCreateProcess(HANDLE computeSystem, const wchar_t* processParameters, HCS_PROCESS_INFORMATION* processInformation, HANDLE* process, wchar_t** result);
 
-//uint32_t HcsRegisterProcessCallback(TODO process, TODO callback, TODO context, TODO callbackHandle);
+uint32_t HcsRegisterProcessCallback(HANDLE process, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle);
 
-//uint32_t HcsTerminateProcess(TODO process, wchar_t** result);
+uint32_t HcsTerminateProcess(HANDLE process, wchar_t** result);
 
 
 uint32_t GetLayerMountPath(DriverInfo* info, const wchar_t* id, uint32_t* length, wchar_t* path);

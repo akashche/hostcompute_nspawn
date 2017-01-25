@@ -15,6 +15,9 @@ typedef uint32_t(*HcsCreateComputeSystem_type)(const wchar_t* id, const wchar_t*
 typedef uint32_t(*HcsStartComputeSystem_type)(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
 typedef uint32_t(*HcsRegisterComputeSystemCallback_type)(HANDLE computeSystem, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle);
 typedef uint32_t(*HcsTerminateComputeSystem_type)(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
+typedef uint32_t(*HcsCreateProcess_type)(HANDLE computeSystem, const wchar_t* processParameters, HCS_PROCESS_INFORMATION* processInformation, HANDLE* process, wchar_t** result);
+typedef uint32_t(*HcsRegisterProcessCallback_type)(HANDLE process, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle);
+typedef uint32_t(*HcsTerminateProcess_type)(HANDLE process, wchar_t** result);
 typedef uint32_t(*GetLayerMountPath_type)(DriverInfo* info, const wchar_t* id, uint32_t* length, wchar_t* path);
 typedef uint32_t(*NameToGuid_type)(const wchar_t* string, GUID* guid);
 typedef uint32_t(*CreateSandboxLayer_type)(DriverInfo* info, const wchar_t* id, const wchar_t* parentId, WC_LAYER_DESCRIPTOR* layers, uint32_t layerCount);
@@ -63,7 +66,7 @@ uint32_t HcsStartComputeSystem(HANDLE computeSystem, const wchar_t* options, wch
 
 uint32_t HcsRegisterComputeSystemCallback(HANDLE computeSystem, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle) {
     static auto fun = reinterpret_cast<HcsRegisterComputeSystemCallback_type>(
-        lookupfun("HcsRegisterComputeSystemCallback"));
+            lookupfun("HcsRegisterComputeSystemCallback"));
     return fun(computeSystem, callback, context, callbackHandle);
 }
 
@@ -71,6 +74,24 @@ uint32_t HcsTerminateComputeSystem(HANDLE computeSystem, const wchar_t* options,
     static auto fun = reinterpret_cast<HcsTerminateComputeSystem_type>(
             lookupfun("HcsTerminateComputeSystem"));
     return fun(computeSystem, options, result);
+}
+
+uint32_t HcsCreateProcess(HANDLE computeSystem, const wchar_t* processParameters, HCS_PROCESS_INFORMATION* processInformation, HANDLE* process, wchar_t** result) {
+    static auto fun = reinterpret_cast<HcsCreateProcess_type>(
+            lookupfun("HcsCreateProcess"));
+    return fun(computeSystem, processParameters, processInformation, process, result);
+}
+
+uint32_t HcsRegisterProcessCallback(HANDLE process, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle) {
+    static auto fun = reinterpret_cast<HcsRegisterProcessCallback_type>(
+            lookupfun("HcsRegisterProcessCallback"));
+    return fun(process, callback, context, callbackHandle);
+}
+
+uint32_t HcsTerminateProcess(HANDLE process, wchar_t** result) {
+    static auto fun = reinterpret_cast<HcsTerminateProcess_type>(
+            lookupfun("HcsTerminateProcess"));
+    return fun(process, result);
 }
 
 uint32_t GetLayerMountPath(DriverInfo* info, const wchar_t* id, uint32_t* length, wchar_t* path) {
