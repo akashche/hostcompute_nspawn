@@ -50,19 +50,19 @@ uint32_t HcsEnumerateComputeSystems(const wchar_t* query, wchar_t** computeSyste
 
 uint32_t HcsCreateComputeSystem(const wchar_t* id, const wchar_t* configuration, HANDLE identity, HANDLE* computeSystem, wchar_t** result) {
     static auto fun = reinterpret_cast<HcsCreateComputeSystem_type>(
-            lookupfun("HcsCreateComputeSystems"));
+            lookupfun("HcsCreateComputeSystem"));
     return fun(id, configuration, identity, computeSystem, result);
 }
 
 uint32_t HcsStartComputeSystem(HANDLE computeSystem, const wchar_t* options, wchar_t** result) {
     static auto fun = reinterpret_cast<HcsStartComputeSystem_type>(
-            lookupfun("HcsStartComputeSystems"));
+            lookupfun("HcsStartComputeSystem"));
     return fun(computeSystem, options, result);
 }
 
 uint32_t HcsTerminateComputeSystem(HANDLE computeSystem, const wchar_t* options, wchar_t** result) {
     static auto fun = reinterpret_cast<HcsTerminateComputeSystem_type>(
-            lookupfun("HcsTerminateComputeSystems"));
+            lookupfun("HcsTerminateComputeSystem"));
     return fun(computeSystem, options, result);
 }
 

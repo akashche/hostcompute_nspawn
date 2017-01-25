@@ -23,6 +23,14 @@ class ContainerConfig {
 
 public:
 
+    ContainerConfig(const std::string& name, const std::string& volume_path, ContainerLayer&& own_layer,
+            std::vector<ContainerLayer>&& parent_layers, const std::string& hostname) :
+    name(std::move(name)),
+    volume_path(std::move(volume_path)),
+    own_layer(std::move(own_layer)),
+    parent_layers(std::move(parent_layers)),
+    hostname(std::move(hostname)) { }
+
     ContainerConfig(const ContainerConfig&) = delete;
 
     ContainerConfig& operator=(const ContainerConfig&) = delete;

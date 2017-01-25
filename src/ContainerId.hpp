@@ -2,6 +2,8 @@
 #ifndef NSPAWN_CONTAINERID_HPP
 #define	NSPAWN_CONTAINERID_HPP
 
+#include <cstring>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -32,11 +34,11 @@ public:
         return *this;
     }
 
-    const std::string& as_name() const {
+    const std::string& get_name() const {
         return name;
     }
 
-    GUID as_guid() const {
+    GUID to_guid() const {
         namespace sc = staticlib::config;
         namespace su = staticlib::utils;
         std::wstring wname = su::widen(name);
@@ -48,17 +50,20 @@ public:
         return guid;
     }
 
-    std::string as_id() const {
+    std::string to_id() const {
         namespace sc = staticlib::config;
         namespace su = staticlib::utils;
-        GUID guid = this->as_guid();
+        GUID guid = this->to_guid();
         std::wstring guidstr;
         guidstr.resize(40);
         auto res_g2 = ::StringFromGUID2(guid, std::addressof(guidstr.front()), static_cast<int>(guidstr.length()));
         if (0 == res_g2) {
             throw NSpawnException(TRACEMSG("Error converting GUID to string, name: [" + name + "]"));
         }
-        return su::narrow(guidstr.c_str(), res_g2);
+        std::string braceful = su::narrow(guidstr.c_str(), res_g2);
+        std::transform(braceful.begin(), braceful.end(), braceful.begin(), ::tolower);
+        std::string res = braceful.substr(1, braceful.length() - 3);
+        return res;
     }
 };
 

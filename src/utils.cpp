@@ -1,6 +1,8 @@
 
 #include "utils.hpp"
 
+#include <ctime>
+
 #include "staticlib/utils.hpp"
 
 namespace nspawn {
@@ -38,6 +40,16 @@ const std::vector<ss::JsonValue>& get_json_array(const ss::JsonField& field) {
                 " value: [" + ss::dump_json_to_string(field.value()) + "]"));
     }
     return field.as_array();
+}
+
+// todo: use chrono
+std::string current_datetime() {
+    time_t cur = time(NULL);
+    struct tm time;
+    localtime_s(&time, &cur);
+    char tmpbuf[128];
+    strftime(tmpbuf, 128, "%Y%m%d%H%M%S", &time);
+    return std::string(tmpbuf);
 }
 
 } // namespace

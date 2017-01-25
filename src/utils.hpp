@@ -19,6 +19,8 @@ const std::string& get_json_string(const staticlib::serialization::JsonValue& va
 const std::vector<staticlib::serialization::JsonValue>& get_json_array(
 const staticlib::serialization::JsonField& field);
 
+std::string current_datetime();
+
 } // namespace
 }
 
