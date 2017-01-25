@@ -33,36 +33,84 @@ namespace ss = staticlib::serialization;
 
 namespace nspawn {
 
+enum class HcsErrors : uint32_t {
+    OPERATION_PENDING = 0xC0370103
+};
+
+enum class NotificationType : uint32_t {
+    // Notifications for HCS_SYSTEM handles
+    SYSTEM_EXIT = 0x00000001,
+    SYSTEM_CREATE_COMPLETE = 0x00000002,
+    SYSTEM_START_COMPLETE = 0x00000003,
+    SYSTEM_PAUSE_COMPLETE = 0x00000004,
+    SYSTEM_RESUME_COMPLETE = 0x00000005,
+
+    // Notifications for HCS_PROCESS handles
+    PROCESS_EXIT = 0x00010000,
+
+    // Common notifications
+    COMMON_INVALID = 0x00000000,
+    COMMON_SERVICE_DISCONNECT = 0x01000000
+};
+
 class CallbackLatch {
     std::mutex mutex;
-    std::condition_variable cv;
-    std::atomic<bool> locked = true;
+    std::condition_variable system_create_cv;
+    std::atomic<bool> system_create_flag = false;
+    std::condition_variable system_start_cv;
+    std::atomic<bool> system_start_flag = false;
+    std::condition_variable system_exit_cv;
+    std::atomic<bool> system_exit_flag = false;
+    std::condition_variable process_exit_cv;
+    std::atomic<bool> process_exit_flag = false;
 
 public:
-    CallbackLatch() {
-        std::unique_lock<std::mutex> lock{mutex};
-        lock.release();
-    }
+    CallbackLatch() { }
 
     CallbackLatch(const CallbackLatch&) = delete;
 
     CallbackLatch& operator=(const CallbackLatch&) = delete;
 
-    void await() {
-        std::unique_lock<std::mutex> lock{mutex, std::adopt_lock};
-        cv.wait(lock, [this]{
-            return !this->locked.load();
-        });
+    void lock() {
+        std::unique_lock<std::mutex> guard{ mutex };
+        guard.release();
     }
 
-    void unlock() {
-        static bool the_true = true;
-        if (locked.compare_exchange_strong(the_true, false)) {
-            std::unique_lock<std::mutex> lock{ mutex };
-            cv.notify_all();
+    void await(NotificationType nt) {
+        switch (nt) {
+        case NotificationType::SYSTEM_CREATE_COMPLETE: await_internal(system_create_cv, system_create_flag); break;
+        case NotificationType::SYSTEM_START_COMPLETE: await_internal(system_start_cv, system_start_flag); break;
+        case NotificationType::SYSTEM_EXIT: await_internal(system_exit_cv, system_exit_flag); break;
+        case NotificationType::PROCESS_EXIT: await_internal(process_exit_cv, process_exit_flag); break;
+        default: throw NSpawnException(TRACEMSG("Unsupported notification type"));
         }
     }
 
+    void unlock(NotificationType nt) {
+        switch (nt) {
+        case NotificationType::SYSTEM_CREATE_COMPLETE: unlock_internal(system_create_cv, system_create_flag); break;
+        case NotificationType::SYSTEM_START_COMPLETE: unlock_internal(system_start_cv, system_start_flag); break;
+        case NotificationType::SYSTEM_EXIT: unlock_internal(system_exit_cv, system_exit_flag); break;
+        case NotificationType::PROCESS_EXIT: unlock_internal(process_exit_cv, process_exit_flag); break;
+        default: { /* ignore */ }
+        }
+    }
+
+private:
+    void await_internal(std::condition_variable& cv, std::atomic<bool>& flag) {
+        std::unique_lock<std::mutex> guard{mutex, std::adopt_lock};
+        cv.wait(guard, [&flag]{
+            return flag.load();
+        });
+    }
+
+    void unlock_internal(std::condition_variable& cv, std::atomic<bool>& flag) {
+        static bool the_false = false;
+        if (flag.compare_exchange_strong(the_false, true)) {
+            std::unique_lock<std::mutex> guard{mutex};
+            cv.notify_all();
+        }
+    }
 };
 
 std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_path,
@@ -167,7 +215,7 @@ void spawn_and_wait(const NSpawnConfig& config) {
         wchar_t* result = nullptr;
         auto res = ::HcsCreateComputeSystem(wname.c_str(), wconf.c_str(), identity, 
                 std::addressof(computeSystem), std::addressof(result));
-        if (0xC0370103 != res) {
+        if (static_cast<uint32_t>(HcsErrors::OPERATION_PENDING) != res) {
             throw NSpawnException(TRACEMSG("'HcsCreateComputeSystem' failed," +
                 " config: [" + conf + "]," +
                 " error: [" + su::errcode_to_string(res) + "]"));
@@ -177,21 +225,22 @@ void spawn_and_wait(const NSpawnConfig& config) {
 
     HANDLE cs_callback_handle;
     CallbackLatch cs_latch;
+    auto cs_callback = [](uint32_t notificationType, void* context, int32_t notificationStatus, wchar_t* notificationData) {
+        std::string data = nullptr != notificationData ? su::narrow(notificationData) : "";
+        std::cout << "CS notification received, notificationType: [" << sc::to_string(notificationType) << "]," <<
+            " notificationStatus: [" << notificationStatus << "]," <<
+            " notificationData: [" << data << "]" << std::endl;
+        CallbackLatch& la = *static_cast<CallbackLatch*> (context);
+        la.unlock(static_cast<NotificationType>(notificationType));
+    };
 
     { // register callback
-        auto cb = [](uint32_t notificationType, void* context, int32_t notificationStatus, wchar_t* notificationData) {            
-            std::string data = nullptr != notificationData ? su::narrow(notificationData) : "";
-            std::cout << "CS notification received, notificationType: [" << sc::to_string(notificationType) << "]," <<
-                    " notificationStatus: [" << notificationStatus << "]," << 
-                    " notificationData: [" << data << "]" << std::endl;
-            CallbackLatch& la = *static_cast<CallbackLatch*> (context);
-            la.unlock();
-        };
-        auto res = ::HcsRegisterComputeSystemCallback(computeSystem, cb, static_cast<void*>(std::addressof(cs_latch)),
+        cs_latch.lock();
+        auto res = ::HcsRegisterComputeSystemCallback(computeSystem, cs_callback, static_cast<void*>(std::addressof(cs_latch)),
                 std::addressof(cs_callback_handle));
         if (0 == res) {
             std::cout << "CS callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
-            cs_latch.await();
+            cs_latch.await(NotificationType::SYSTEM_CREATE_COMPLETE);
             std::cout << "CS create latch unlocked" << std::endl;
         }
         else {
@@ -214,16 +263,25 @@ void spawn_and_wait(const NSpawnConfig& config) {
     }
 
     { // start
-
+        std::wstring options = su::widen("");
+        wchar_t* result = nullptr;
+        cs_latch.lock();
+        auto res = ::HcsStartComputeSystem(computeSystem, options.c_str(), std::addressof(result));
+        if (static_cast<uint32_t>(HcsErrors::OPERATION_PENDING) != res) {
+            throw NSpawnException(TRACEMSG("'HcsStartComputeSystem' failed," +
+                " error: [" + su::errcode_to_string(res) + "]"));
+        }
+        cs_latch.await(NotificationType::SYSTEM_START_COMPLETE);
+        std::cout << "Container started, name: [" << layer.get_name() << "]" << std::endl;
     }
-
-    std::cout << "Destroying container, name: [" << layer.get_name() << "]" << std::endl;
 
     { // terminate
         std::wstring options = su::widen("{}");
         wchar_t* result = nullptr;
+        cs_latch.lock();
         auto res = ::HcsTerminateComputeSystem(computeSystem, options.c_str(), std::addressof(result));
-        if (0xC0370103 == res) {
+        if (static_cast<uint32_t>(HcsErrors::OPERATION_PENDING) == res) {
+            cs_latch.await(NotificationType::SYSTEM_EXIT);
             std::cout << "Container terminated, name: [" << layer.get_name() << "]" << std::endl;
         } else {
             std::cerr << "ERROR: 'HcsTerminateComputeSystem' failed, name: [" << layer.get_name() << "]" << 
