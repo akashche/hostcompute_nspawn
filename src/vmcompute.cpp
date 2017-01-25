@@ -13,6 +13,7 @@ namespace su = staticlib::utils;
 typedef uint32_t(*HcsEnumerateComputeSystems_type)(const wchar_t* query, wchar_t** computeSystems, wchar_t** result);
 typedef uint32_t(*HcsCreateComputeSystem_type)(const wchar_t* id, const wchar_t* configuration, HANDLE identity, HANDLE* computeSystem, wchar_t** result);
 typedef uint32_t(*HcsStartComputeSystem_type)(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
+typedef uint32_t(*HcsRegisterComputeSystemCallback_type)(HANDLE computeSystem, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle);
 typedef uint32_t(*HcsTerminateComputeSystem_type)(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
 typedef uint32_t(*GetLayerMountPath_type)(DriverInfo* info, const wchar_t* id, uint32_t* length, wchar_t* path);
 typedef uint32_t(*NameToGuid_type)(const wchar_t* string, GUID* guid);
@@ -58,6 +59,12 @@ uint32_t HcsStartComputeSystem(HANDLE computeSystem, const wchar_t* options, wch
     static auto fun = reinterpret_cast<HcsStartComputeSystem_type>(
             lookupfun("HcsStartComputeSystem"));
     return fun(computeSystem, options, result);
+}
+
+uint32_t HcsRegisterComputeSystemCallback(HANDLE computeSystem, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle) {
+    static auto fun = reinterpret_cast<HcsRegisterComputeSystemCallback_type>(
+        lookupfun("HcsRegisterComputeSystemCallback"));
+    return fun(computeSystem, callback, context, callbackHandle);
 }
 
 uint32_t HcsTerminateComputeSystem(HANDLE computeSystem, const wchar_t* options, wchar_t** result) {

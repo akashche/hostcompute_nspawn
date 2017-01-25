@@ -45,13 +45,15 @@ typedef struct _WC_LAYER_DESCRIPTOR {
     PCWSTR Path;
 } WC_LAYER_DESCRIPTOR;
 
+typedef void(*HcsNotificationCallback_type)(uint32_t notificationType, void* context, int32_t notificationStatus, wchar_t* notificationData);
+
 uint32_t HcsEnumerateComputeSystems(const wchar_t* query, wchar_t** computeSystems, wchar_t** result);
 
 uint32_t HcsCreateComputeSystem(const wchar_t* id, const wchar_t* configuration, HANDLE identity, HANDLE* computeSystem, wchar_t** result);
 
 uint32_t HcsStartComputeSystem(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
 
-//uint32_t HcsRegisterComputeSystemCallback(HANDLE computeSystem, TODO callback, TODO context, TODO callbackHandle);
+uint32_t HcsRegisterComputeSystemCallback(HANDLE computeSystem, HcsNotificationCallback_type callback, void* context, HANDLE* callbackHandle);
 
 uint32_t HcsTerminateComputeSystem(HANDLE computeSystem, const wchar_t* options, wchar_t** result);
 

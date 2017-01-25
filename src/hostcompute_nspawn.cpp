@@ -4,8 +4,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <iostream>
+#include <mutex>
 #include <thread>
 
 #include "staticlib/config.hpp"
@@ -30,6 +33,38 @@ namespace ss = staticlib::serialization;
 
 namespace nspawn {
 
+class CallbackLatch {
+    std::mutex mutex;
+    std::condition_variable cv;
+    std::atomic<bool> locked = true;
+
+public:
+    CallbackLatch() {
+        std::unique_lock<std::mutex> lock{mutex};
+        lock.release();
+    }
+
+    CallbackLatch(const CallbackLatch&) = delete;
+
+    CallbackLatch& operator=(const CallbackLatch&) = delete;
+
+    void await() {
+        std::unique_lock<std::mutex> lock{mutex, std::adopt_lock};
+        cv.wait(lock, [this]{
+            return !this->locked.load();
+        });
+    }
+
+    void unlock() {
+        static bool the_true = true;
+        if (locked.compare_exchange_strong(the_true, false)) {
+            std::unique_lock<std::mutex> lock{ mutex };
+            cv.notify_all();
+        }
+    }
+
+};
+
 std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_path,
         const std::string& parent_layer_name) {
     std::vector<ContainerLayer> res;
@@ -40,8 +75,6 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
 }
 
 void spawn_and_wait(const NSpawnConfig& config) {
-    (void) config;
-
     // prepare DriverInfo
     std::string base_path = su::strip_filename(config.parent_layer_directory);
     std::replace(base_path.begin(), base_path.end(), '/', '\\');
@@ -142,21 +175,47 @@ void spawn_and_wait(const NSpawnConfig& config) {
         std::cout << "Container created, name: [" << layer.get_name() << "]" << std::endl;
     }
 
+    HANDLE cs_callback_handle;
+    CallbackLatch cs_latch;
+
+    { // register callback
+        auto cb = [](uint32_t notificationType, void* context, int32_t notificationStatus, wchar_t* notificationData) {            
+            std::string data = nullptr != notificationData ? su::narrow(notificationData) : "";
+            std::cout << "CS notification received, notificationType: [" << sc::to_string(notificationType) << "]," <<
+                    " notificationStatus: [" << notificationStatus << "]," << 
+                    " notificationData: [" << data << "]" << std::endl;
+            CallbackLatch& la = *static_cast<CallbackLatch*> (context);
+            la.unlock();
+        };
+        auto res = ::HcsRegisterComputeSystemCallback(computeSystem, cb, static_cast<void*>(std::addressof(cs_latch)),
+                std::addressof(cs_callback_handle));
+        if (0 == res) {
+            std::cout << "CS callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
+            cs_latch.await();
+            std::cout << "CS create latch unlocked" << std::endl;
+        }
+        else {
+            std::cerr << "ERROR: 'HcsRegisterComputeSystemCallback' failed, name: [" << layer.get_name() << "]" <<
+                " error: [" << su::errcode_to_string(res) << "]" << std::endl;
+        }
+    }
+
     { // enumerate
         std::wstring query = su::widen("{}");
         wchar_t* computeSystems = nullptr;
         wchar_t* result = nullptr;
         auto res = ::HcsEnumerateComputeSystems(query.c_str(),
-            std::addressof(computeSystems), std::addressof(result));
+                std::addressof(computeSystems), std::addressof(result));
         if (0 != res) {
             throw NSpawnException(TRACEMSG("'HcsEnumerateComputeSystems' failed," +
-                " error: [" + su::errcode_to_string(res) + "]"));
+                    " error: [" + su::errcode_to_string(res) + "]"));
         }
         std::cout << su::narrow(computeSystems) << std::endl;
     }
 
-    // todo: callbacks
-    std::this_thread::sleep_for(std::chrono::seconds{5});
+    { // start
+
+    }
 
     std::cout << "Destroying container, name: [" << layer.get_name() << "]" << std::endl;
 
