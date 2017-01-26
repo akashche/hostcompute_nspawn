@@ -132,7 +132,7 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
     auto json_file = std::string(base_path) + "\\" + parent_layer_name + "\\layerchain.json";
     su::FileDescriptor fd{ json_file, 'r' };
     ss::JsonValue json = ss::load_json(fd);
-    std::cout << ss::dump_json_to_string(json) << std::endl;
+    std::cout << "Ascendant layers: " << ss::dump_json_to_string(json) << std::endl;
     for (auto& el : utils::get_json_array(json, json_file)) {
         std::string path = utils::get_json_string(el, json_file);
         std::string dir = su::strip_filename(path);
@@ -162,7 +162,7 @@ void hcs_create_layer(DriverInfo& driver_info, ContainerLayer& layer, const std:
             " parent_layer_name: [" + parent_layer_name + "]," +
             " error: [" + su::errcode_to_string(err) + "]"));
     }
-    std::cout << "Layer created, name: [" << layer.get_name() << "]" << std::endl;
+    std::cout << "CreateSandboxLayer: " << "Layer created, name: [" << layer.get_name() << "]" << std::endl;
 }
 
 void hcs_activate_layer(DriverInfo& driver_info, ContainerLayer& layer) {
@@ -173,7 +173,7 @@ void hcs_activate_layer(DriverInfo& driver_info, ContainerLayer& layer) {
             " layer_name: [" + layer.get_name() + "]," +
             " error: [" + su::errcode_to_string(err) + "]"));
     }
-    std::cout << "Layer activated, name: [" << layer.get_name() << "]" << std::endl;
+    std::cout << "ActivateLayer: " << "Layer activated, name: [" << layer.get_name() << "]" << std::endl;
 }
 
 void hcs_prepare_layer(DriverInfo& driver_info, ContainerLayer& layer, 
@@ -186,7 +186,7 @@ void hcs_prepare_layer(DriverInfo& driver_info, ContainerLayer& layer,
             " layer_name: [" + layer.get_name() + "]," +
             " error: [" + su::errcode_to_string(err) + "]"));
     }
-    std::cout << "Layer prepared, name: [" << layer.get_name() << "]" << std::endl;
+    std::cout << "PrepareLayer: " << "Layer prepared, name: [" << layer.get_name() << "]" << std::endl;
 }
 
 std::string hcs_get_layer_mount_path(DriverInfo& driver_info, ContainerLayer& layer) {
@@ -202,7 +202,7 @@ std::string hcs_get_layer_mount_path(DriverInfo& driver_info, ContainerLayer& la
             " error: [" + su::errcode_to_string(err) + "]"));
     }
     std::string res = su::narrow(path.c_str());
-    std::cout << "Found volume path: [" << res << "]" <<
+    std::cout << "GetLayerMountPath: " << "Found volume path: [" << res << "]" <<
         " for layer, name: [" << layer.get_name() << "]" << std::endl;
     return res;
 }
@@ -221,7 +221,7 @@ HANDLE hcs_create_compute_system(ContainerConfig& config, ContainerLayer& layer)
             " config: [" + conf + "]," +
             " error: [" + su::errcode_to_string(res) + "]"));
     }
-    std::cout << "Container created, name: [" << layer.get_name() << "]" << std::endl;
+    std::cout << "HcsCreateComputeSystem: " << "Container created, name: [" << layer.get_name() << "]" << std::endl;
     return computeSystem;
 }
 
@@ -240,9 +240,9 @@ HANDLE hcs_register_compute_system_callback(HANDLE compute_system, ContainerLaye
     auto res = ::HcsRegisterComputeSystemCallback(compute_system, container_callback, static_cast<void*>(std::addressof(latch)),
         std::addressof(cs_callback_handle));
     if (0 == res) {
-        std::cout << "CS callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
+        std::cout << "HcsRegisterComputeSystemCallback: " << "CS callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
         latch.await(NotificationType::SYSTEM_CREATE_COMPLETE);
-        std::cout << "CS create latch unlocked" << std::endl;
+        std::cout << "HcsRegisterComputeSystemCallback: " << "CS create latch unlocked" << std::endl;
     }
     else {
         std::cerr << "ERROR: 'HcsRegisterComputeSystemCallback' failed, name: [" << layer.get_name() << "]" <<
@@ -261,7 +261,7 @@ void hcs_start_compute_system(HANDLE compute_system, ContainerLayer& layer, Call
             " error: [" + su::errcode_to_string(res) + "]"));
     }
     latch.await(NotificationType::SYSTEM_START_COMPLETE);
-    std::cout << "Container started, name: [" << layer.get_name() << "]" << std::endl;
+    std::cout << "HcsStartComputeSystem: " << "Container started, name: [" << layer.get_name() << "]" << std::endl;
 }
 
 void hcs_enumerate_compute_systems() {
@@ -272,16 +272,16 @@ void hcs_enumerate_compute_systems() {
         std::addressof(computeSystems), std::addressof(result));
     if (0 != res) {
         throw NSpawnException(TRACEMSG("'HcsEnumerateComputeSystems' failed," +
-            " error: [" + su::errcode_to_string(res) + "]"));
+                " error: [" + su::errcode_to_string(res) + "]"));
     }
-    std::cout << su::narrow(computeSystems) << std::endl;
+    std::cout << "HcsEnumerateComputeSystems: " << "Compute systems found: " << su::narrow(computeSystems) << std::endl;
 }
 
 HANDLE hcs_create_process(HANDLE compute_system, const NSpawnConfig& config) {
     HANDLE process = nullptr;
     auto pcfg = ProcessConfig(config.process_executable, config.mapped_directory, config.stdout_filename);
     std::string pcfg_json = ss::dump_json_to_string(pcfg.to_json());
-    std::cout << pcfg_json << std::endl;
+    std::cout << "Process config: " << pcfg_json << std::endl;
     std::wstring wpcfg_json = su::widen(pcfg_json);
     HCS_PROCESS_INFORMATION hpi;
     std::memset(std::addressof(hpi), '\0', sizeof(HCS_PROCESS_INFORMATION));
@@ -293,7 +293,7 @@ HANDLE hcs_create_process(HANDLE compute_system, const NSpawnConfig& config) {
             " config: [" + pcfg_json + "]," +
             " error: [" + su::errcode_to_string(res) + "]"));
     }
-    std::cout << "Process created" << std::endl;
+    std::cout << "HcsCreateProcess: " << "Process created" << std::endl;
     return process;
 }
 
@@ -302,9 +302,9 @@ HANDLE hcs_register_process_callback(HANDLE process, ContainerLayer& layer, Call
     latch.lock();
     auto res = ::HcsRegisterProcessCallback(process, container_callback, std::addressof(latch), std::addressof(process_callback_handle));
     if (0 == res) {
-        std::cout << "Process callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
+        std::cout << "HcsRegisterProcessCallback: " << "Process callback registered successfully, name: [" << layer.get_name() << "]" << std::endl;
         latch.await(NotificationType::PROCESS_EXIT);
-        std::cout << "Process create latch unlocked" << std::endl;
+        std::cout << "HcsRegisterProcessCallback: " << "Process create latch unlocked" << std::endl;
     }
     else {
         std::cerr << "ERROR: 'HcsRegisterProcessCallback' failed, name: [" << layer.get_name() << "]" <<
@@ -320,7 +320,7 @@ void hcs_terminate_compute_system(HANDLE compute_system, ContainerLayer& layer, 
     auto res = ::HcsTerminateComputeSystem(compute_system, options.c_str(), std::addressof(result));
     if (static_cast<uint32_t>(HcsErrors::OPERATION_PENDING) == res) {
         latch.await(NotificationType::SYSTEM_EXIT);
-        std::cout << "Container terminated, name: [" << layer.get_name() << "]" << std::endl;
+        std::cout << "HcsTerminateComputeSystem: " << "Container terminated, name: [" << layer.get_name() << "]" << std::endl;
     }
     else {
         std::cerr << "ERROR: 'HcsTerminateComputeSystem' failed, name: [" << layer.get_name() << "]" <<
@@ -332,7 +332,7 @@ void hcs_unprepare_layer(DriverInfo& driver_info, ContainerLayer& layer) {
     std::wstring wname = su::widen(layer.get_name());
     auto res = ::UnprepareLayer(std::addressof(driver_info), wname.c_str());
     if (0 == res) {
-        std::cout << "Layer unprepared, name: [" << layer.get_name() << "]" << std::endl;
+        std::cout << "UnprepareLayer: " << "Layer unprepared, name: [" << layer.get_name() << "]" << std::endl;
     }
     else {
         std::cerr << "ERROR: 'UnprepareLayer' failed, name: [" << layer.get_name() << "]" <<
@@ -344,7 +344,7 @@ void hcs_deactivate_layer(DriverInfo& driver_info, ContainerLayer& layer) {
     std::wstring wname = su::widen(layer.get_name());
     auto res = ::DeactivateLayer(std::addressof(driver_info), wname.c_str());
     if (0 == res) {
-        std::cout << "Layer deactivated, name: [" << layer.get_name() << "]" << std::endl;
+        std::cout << "DeactivateLayer: " << "Layer deactivated, name: [" << layer.get_name() << "]" << std::endl;
     }
     else {
         std::cerr << "ERROR: 'DeactivateLayer' failed, name: [" << layer.get_name() << "]" <<
@@ -356,7 +356,7 @@ void hcs_destroy_layer(DriverInfo& driver_info, ContainerLayer& layer) {
     std::wstring wname = su::widen(layer.get_name());
     auto res = ::DestroyLayer(std::addressof(driver_info), wname.c_str());
     if (0 == res) {
-        std::cout << "Layer destroyed, name: [" << layer.get_name() << "]" << std::endl;
+        std::cout << "DestroyLayer: " << "Layer destroyed, name: [" << layer.get_name() << "]" << std::endl;
     }
     else {
         std::cerr << "ERROR: 'DestroyLayer' failed, name: [" << layer.get_name() << "]" <<
@@ -365,7 +365,7 @@ void hcs_destroy_layer(DriverInfo& driver_info, ContainerLayer& layer) {
 }
 
 void spawn_and_wait(const NSpawnConfig& config) {
-    std::cout << ss::dump_json_to_string(config.to_json()) << std::endl;
+    std::cout << "NSpawn config: " << ss::dump_json_to_string(config.to_json()) << std::endl;
 
     // common parameters
     auto rng = su::RandomStringGenerator("0123456789abcdef");
@@ -390,6 +390,7 @@ void spawn_and_wait(const NSpawnConfig& config) {
     // create and start container
     auto container_config = ContainerConfig(base_path, config.process_directory, config.mapped_directory,
         volume_path, layer.clone(), acsendant_layers, rng.generate(8));
+    std::cout << "Container config: " << ss::dump_json_to_string(container_config.to_json()) << std::endl;
     HANDLE compute_system = hcs_create_compute_system(container_config, layer);
     CallbackLatch cs_latch;
     hcs_register_compute_system_callback(compute_system, layer, cs_latch);

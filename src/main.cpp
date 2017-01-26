@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
     char* err = ::hostcompute_nspawn(conf.c_str(), static_cast<int> (conf.length()));
     if (nullptr != err) {
         std::cerr << "ERROR: " << err << std::endl;
+        ::hostcompute_nspawn_free(err);
         std::exit(1);
     }
 
