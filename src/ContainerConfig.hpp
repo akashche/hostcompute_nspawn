@@ -57,6 +57,14 @@ public:
         for (auto& la : parent_layers) {
             layers.emplace_back(la.to_json());
         }
+        std::vector<ss::JsonField> mappeddir;
+        mappeddir.emplace_back("HostPath", "C:\\nspawntest");
+        mappeddir.emplace_back("ContainerPath", "C:\\nspawndir");
+        mappeddir.emplace_back("ReadOnly", false);
+        mappeddir.emplace_back("BandwidthMaximum", 0);
+        mappeddir.emplace_back("IOPSMaximum", 0);
+        std::vector<ss::JsonValue> mdirs;
+        mdirs.emplace_back(std::move(mappeddir));
 
         return {
             { "SystemType", "Container" },
@@ -68,7 +76,7 @@ public:
             { "LayerFolderPath", own_layer.get_path() },
             { "Layers", std::move(layers) },
             { "HostName", hostname },
-            { "MappedDirectories", std::vector<ss::JsonValue>() }, 
+            { "MappedDirectories", std::move(mdirs) },
             { "HvPartition", false },
             { "EndpointList", std::vector<ss::JsonValue>() },
             { "Servicing", false },

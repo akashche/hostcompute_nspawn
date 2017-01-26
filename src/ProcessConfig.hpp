@@ -36,15 +36,15 @@ public:
 
     staticlib::serialization::JsonValue to_json() const {
         namespace ss = staticlib::serialization;
-        std::vector<ss::JsonValue> console_dimensions;// = {32, 121};
-        console_dimensions.emplace_back(32);
-        console_dimensions.emplace_back(121);
+        std::vector<ss::JsonValue> console_dimensions;
+        //console_dimensions.emplace_back(32);
+        //console_dimensions.emplace_back(121);
         std::vector<ss::JsonField> env;
         return {
             {"ApplicationName", name}, 
-            {"CommandLine", "C:\\Windows\\System32\\cmd.exe /c echo hello"},
+            { "CommandLine", "C:\\Windows\\System32\\cmd.exe /c C:\\nspawndir\\jdk\\bin\\java.exe -version >> nspawn_out.txt 2>&1" },
             {"User", ""},
-            {"WorkingDirectory", "C:\\"},
+            {"WorkingDirectory", "C:\\nspawndir"},
             {"Environment", std::move(env)},
             {"EmulateConsole", false},
             {"CreateStdInPipe", false},
