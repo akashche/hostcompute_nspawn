@@ -27,14 +27,18 @@ public:
 
     ContainerConfig(const std::string& name, const std::string& process_dir, const std::string& mapped_dir,
             const std::string& volume_path, ContainerLayer&& own_layer, 
-            std::vector<ContainerLayer>&& parent_layers, const std::string& hostname) :
+            const std::vector<ContainerLayer>& parent_layers, const std::string& hostname) :
     name(std::move(name)),
     process_dir(std::move(process_dir)),
     mapped_dir(std::move(mapped_dir)),
     volume_path(std::move(volume_path)),
     own_layer(std::move(own_layer)),
-    parent_layers(std::move(parent_layers)),
-    hostname(std::move(hostname)) { }
+    parent_layers(),
+    hostname(std::move(hostname)) {
+        for (auto& la : parent_layers) {
+            this->parent_layers.emplace_back(la.clone());
+        }
+    }
 
     ContainerConfig(const ContainerConfig&) = delete;
 

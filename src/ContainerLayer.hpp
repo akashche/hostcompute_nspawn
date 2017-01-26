@@ -67,7 +67,7 @@ namespace nspawn {
             return res;
         }
 
-        ContainerLayer clone() {
+        ContainerLayer clone() const {
             return ContainerLayer(base_path, id.get_name());
         }
 
