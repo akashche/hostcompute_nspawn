@@ -2,7 +2,7 @@ Run containers using Windows Host Compute Service
 =================================================
 
 `hostcompute_nspawn` utility is a proof-of-concept implementation of
-a native Windows containers launcher. It is inspired by [systemd-nspawn](https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html).
+a launcher for native Windows containers. It is inspired by [systemd-nspawn](https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html).
 
 Utility uses Windows Host Compute Service, that is available in Windows SErver 2016,
 to mount specified directory into container and run specified executable from that
@@ -12,7 +12,8 @@ Current limitations:
 
  - no base images handling (not easy to solve as Windows images are not free, Docker can be used to pull the initial image)
  - no console support (stdout is redirected to file in mounted directory)
- - not networking support (should be easy to add)
+ - no networking support (should be easy to add)
+ - no RAM/CPU/IOPS limits (should be easy to add)
 
 Download
 --------
