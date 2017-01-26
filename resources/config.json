@@ -1,7 +1,10 @@
 {
     "process_directory": "C:/projects/hostcompute_nspawn/build/bin",
-    "process_executable": "C:/windows/system32/cmd.exe",
-    "process_arguments": ["C:/test/test.bat"],
+    "process_executable": "hello.exe",
+    "process_arguments": ["foo", "bar", "baz"],
+
+    "mapped_directory": "c:/nspawndir",
+    "stdout_filename": "nspawn_out.txt",
 
     "parent_layer_directory": "C:/ProgramData/docker/windowsfilter/c889dc67d89b23186c943dadaa8ec4bbabd090a9dcfeffea99b61107f7433604"
 

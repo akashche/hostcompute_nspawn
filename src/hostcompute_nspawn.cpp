@@ -125,9 +125,11 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
 }
 
 void spawn_and_wait(const NSpawnConfig& config) {
+
+    std::cout << ss::dump_json_to_string(config.to_json()) << std::endl;
+
     // prepare DriverInfo
     std::string base_path = su::strip_filename(config.parent_layer_directory);
-    std::replace(base_path.begin(), base_path.end(), '/', '\\');
     std::string parent_layer_name = su::strip_parent_dir(config.parent_layer_directory);
     std::wstring wbp = su::widen(base_path);
     DriverInfo driver_info;
@@ -208,8 +210,8 @@ void spawn_and_wait(const NSpawnConfig& config) {
     HANDLE computeSystem = nullptr;
 
     { // create container
-        auto container_config = ContainerConfig(base_path, volume_path, layer.clone(),
-                std::move(alpass), rng.generate(8));
+        auto container_config = ContainerConfig(base_path, config.process_directory, config.mapped_directory,
+                volume_path, layer.clone(), std::move(alpass), rng.generate(8));
         std::wstring wname = su::widen(layer.get_name());
         std::string conf = ss::dump_json_to_string(container_config.to_json());
         std::wstring wconf = su::widen(conf);
@@ -280,8 +282,9 @@ void spawn_and_wait(const NSpawnConfig& config) {
     HANDLE process = nullptr;
 
     { // start process
-        auto pcfg = ProcessConfig("");
+        auto pcfg = ProcessConfig(config.process_executable, config.mapped_directory, config.stdout_filename);
         std::string pcfg_json = ss::dump_json_to_string(pcfg.to_json());
+        std::cout << pcfg_json << std::endl;
         std::wstring wpcfg_json = su::widen(pcfg_json);
         HCS_PROCESS_INFORMATION hpi;
         std::memset(std::addressof(hpi), '\0', sizeof(HCS_PROCESS_INFORMATION));

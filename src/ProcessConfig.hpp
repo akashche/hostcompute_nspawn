@@ -15,36 +15,45 @@ namespace nspawn {
 
 
 class ProcessConfig {
-    std::string name;
+    std::string process_executable;
+    std::string mapped_directory;
+    std::string stdout_filename;
 
 public:
 
-    ProcessConfig(const std::string& name) :
-    name(std::move(name)) { }
+    ProcessConfig(const std::string& process_executable, const std::string& mapped_directory,
+            const std::string& stdout_filename) :
+    process_executable(process_executable.data(), process_executable.length()),
+    mapped_directory(mapped_directory.data(), mapped_directory.length()),
+    stdout_filename(stdout_filename.data(), stdout_filename.length()) { }
 
     ProcessConfig(const ProcessConfig&) = delete;
 
     ProcessConfig& operator=(const ProcessConfig&) = delete;
 
     ProcessConfig(ProcessConfig&& other):
-    name(std::move(other.name)) { }
+    process_executable(std::move(other.process_executable)),
+    mapped_directory(std::move(other.mapped_directory)),
+    stdout_filename(std::move(stdout_filename)) { }
 
     ProcessConfig& operator=(ProcessConfig&& other) {
-        this->name = std::move(other.name);
+        this->process_executable = std::move(other.process_executable);
+        this->mapped_directory = std::move(other.mapped_directory);
+        this->stdout_filename = std::move(other.stdout_filename);
         return *this;
     }
 
     staticlib::serialization::JsonValue to_json() const {
         namespace ss = staticlib::serialization;
         std::vector<ss::JsonValue> console_dimensions;
-        //console_dimensions.emplace_back(32);
-        //console_dimensions.emplace_back(121);
         std::vector<ss::JsonField> env;
+        std::string cline = std::string("C:\\Windows\\System32\\cmd.exe /c ") +
+                mapped_directory + "\\" + process_executable + " >> " + stdout_filename + " 2>&1";
         return {
-            {"ApplicationName", name}, 
-            {"CommandLine", "C:\\Windows\\System32\\cmd.exe /c C:\\nspawndir\\hello.exe >> nspawn_out.txt 2>&1" },
+            {"ApplicationName", ""}, 
+            {"CommandLine", cline},
             {"User", ""},
-            {"WorkingDirectory", "C:\\nspawndir"},
+            {"WorkingDirectory", mapped_directory},
             {"Environment", std::move(env)},
             {"EmulateConsole", false},
             {"CreateStdInPipe", false},
