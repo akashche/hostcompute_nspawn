@@ -31,16 +31,22 @@ namespace nspawn {
 
 class ProcessConfig {
     std::string process_executable;
+    std::vector<std::string> process_arguments;
     std::string mapped_directory;
     std::string stdout_filename;
 
 public:
 
-    ProcessConfig(const std::string& process_executable, const std::string& mapped_directory,
-            const std::string& stdout_filename) :
+    ProcessConfig(const std::string& process_executable, const std::vector<std::string>& process_arguments,
+            const std::string& mapped_directory, const std::string& stdout_filename) :
     process_executable(process_executable.data(), process_executable.length()),
+    process_arguments(),
     mapped_directory(mapped_directory.data(), mapped_directory.length()),
-    stdout_filename(stdout_filename.data(), stdout_filename.length()) { }
+    stdout_filename(stdout_filename.data(), stdout_filename.length()) {
+        for (auto& st : process_arguments) {
+            this->process_arguments.emplace_back(st.data(), st.length());
+        }
+    }
 
     ProcessConfig(const ProcessConfig&) = delete;
 
@@ -63,7 +69,12 @@ public:
         std::vector<ss::JsonValue> console_dimensions;
         std::vector<ss::JsonField> env;
         std::string cline = std::string("C:\\Windows\\System32\\cmd.exe /c ") +
-                mapped_directory + "\\" + process_executable + " >> " + stdout_filename + " 2>&1";
+                mapped_directory + "\\" + process_executable;
+        for (auto& ar : process_arguments) {
+            cline.append(" ");
+            cline.append(ar);
+        }
+        cline.append(std::string(" >> ") + stdout_filename + " 2>&1");
         return {
             {"ApplicationName", ""}, 
             {"CommandLine", cline},

@@ -294,7 +294,8 @@ void hcs_enumerate_compute_systems() {
 
 HANDLE hcs_create_process(HANDLE compute_system, const NSpawnConfig& config) {
     HANDLE process = nullptr;
-    auto pcfg = ProcessConfig(config.process_executable, config.mapped_directory, config.stdout_filename);
+    auto pcfg = ProcessConfig(config.process_executable, config.process_arguments, 
+            config.mapped_directory, config.stdout_filename);
     std::string pcfg_json = ss::dump_json_to_string(pcfg.to_json());
     std::cout << "Process config: " << pcfg_json << std::endl;
     std::wstring wpcfg_json = su::widen(pcfg_json);
