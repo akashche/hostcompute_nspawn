@@ -58,7 +58,7 @@ public:
             layers.emplace_back(la.to_json());
         }
         std::vector<ss::JsonField> mappeddir;
-        mappeddir.emplace_back("HostPath", "C:\\nspawntest");
+        mappeddir.emplace_back("HostPath", "C:\\projects\\hostcompute_nspawn\\build\\bin");
         mappeddir.emplace_back("ContainerPath", "C:\\nspawndir");
         mappeddir.emplace_back("ReadOnly", false);
         mappeddir.emplace_back("BandwidthMaximum", 0);

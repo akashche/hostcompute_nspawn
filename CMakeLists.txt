@@ -37,8 +37,8 @@ staticlib_serialization_pkg_check_modules ( ${PROJECT_NAME}_DEPS_PC REQUIRED ${P
 # resources
 configure_file ( ${CMAKE_CURRENT_LIST_DIR}/resources/hostcompute_nspawn.rc
         ${CMAKE_CURRENT_BINARY_DIR}/hostcompute_nspawn.rc )
-configure_file ( ${CMAKE_CURRENT_LIST_DIR}/resources/config.json
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config.json )
+configure_file ( ${CMAKE_CURRENT_LIST_DIR}/test/test.bat
+        ${CMAKE_CURRENT_BINARY_DIR}/test.bat COPYONLY )
 
 # executable
 add_executable ( ${PROJECT_NAME}
@@ -69,4 +69,6 @@ target_link_libraries ( ${PROJECT_NAME}
         ${${PROJECT_NAME}_DEPS_PC_LIBRARIES} )
 
 set_property ( TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS "/manifest:no" )
+
+add_executable ( hello ${CMAKE_CURRENT_LIST_DIR}/test/hello.cpp )
 

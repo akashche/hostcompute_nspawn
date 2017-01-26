@@ -21,6 +21,7 @@ class Options {
     std::vector<struct poptOption> table;
     // parse options list
     char* config_opt = nullptr;
+    char* directory_opt = nullptr;
     int help_opt = 0;
     
 public:
@@ -29,11 +30,13 @@ public:
     std::vector<std::string> args;
     
     // public options list
+    std::string directory;
     std::string config;
     bool help;
 
     Options(int argc, char** argv) :
     table({
+        { "directory", 'D', POPT_ARG_STRING, &directory_opt, static_cast<int> ('D'), "Path to directory to mount into container", "c:/path/to/directory" },
         { "config", 'c', POPT_ARG_STRING, &config_opt, static_cast<int> ('c'), "Path to JSON config file", "config.json"},
         { "help", 'h', POPT_ARG_NONE, &help_opt, static_cast<int> ('h'), "Show this help message", nullptr},
         { nullptr, 0, 0, nullptr, 0, nullptr, nullptr}
@@ -76,6 +79,7 @@ public:
         }
         
         { // set public opts
+            directory = nullptr != directory_opt ? std::string(directory_opt) : "";
             config = nullptr != config_opt ? std::string(config_opt) : "";
             help = 0 != help_opt;
         }

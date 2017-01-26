@@ -1,5 +1,5 @@
 {
-    "process_directory": "C:/projects/hostcompute_nspawn/test",
+    "process_directory": "C:/projects/hostcompute_nspawn/build/bin",
     "process_executable": "C:/windows/system32/cmd.exe",
     "process_arguments": ["C:/test/test.bat"],
 

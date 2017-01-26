@@ -42,7 +42,7 @@ public:
         std::vector<ss::JsonField> env;
         return {
             {"ApplicationName", name}, 
-            { "CommandLine", "C:\\Windows\\System32\\cmd.exe /c C:\\nspawndir\\jdk\\bin\\java.exe -version >> nspawn_out.txt 2>&1" },
+            {"CommandLine", "C:\\Windows\\System32\\cmd.exe /c C:\\nspawndir\\hello.exe >> nspawn_out.txt 2>&1" },
             {"User", ""},
             {"WorkingDirectory", "C:\\nspawndir"},
             {"Environment", std::move(env)},
