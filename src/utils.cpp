@@ -42,6 +42,16 @@ const std::vector<ss::JsonValue>& get_json_array(const ss::JsonField& field) {
     return field.as_array();
 }
 
+const std::vector<staticlib::serialization::JsonValue>& get_json_array(
+        const staticlib::serialization::JsonValue& value, const std::string& name) {
+    if (ss::JsonType::ARRAY != value.type()) {
+        throw NSpawnException(TRACEMSG("Invalid '" + name + "' field,"
+            " type: [" + ss::stringify_json_type(value.type()) + "]," +
+            " value: [" + ss::dump_json_to_string(value) + "]"));
+    }
+    return value.as_array();
+}
+
 // todo: use chrono
 std::string current_datetime() {
     time_t cur = time(NULL);

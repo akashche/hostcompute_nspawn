@@ -23,9 +23,13 @@ staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_io )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_ranges )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_utils )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_serialization )
+staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_pimpl )
+staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_tinydir )
 
 set ( ${PROJECT_NAME}_DEPS
         staticlib_serialization
+        staticlib_tinydir
+        staticlib_pimpl
         staticlib_utils
         staticlib_ranges
         staticlib_io

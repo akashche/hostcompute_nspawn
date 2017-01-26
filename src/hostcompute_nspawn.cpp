@@ -13,8 +13,9 @@
 
 #include "staticlib/config.hpp"
 #include "staticlib/io.hpp"
-#include "staticlib/utils.hpp"
 #include "staticlib/serialization.hpp"
+#include "staticlib/tinydir.hpp"
+#include "staticlib/utils.hpp"
 
 #include "NSpawnConfig.hpp"
 #include "NSpawnException.hpp"
@@ -28,8 +29,9 @@ namespace { // anonymous
 
 namespace sc = staticlib::config;
 namespace si = staticlib::io;
-namespace su = staticlib::utils;
 namespace ss = staticlib::serialization;
+namespace st = staticlib::tinydir;
+namespace su = staticlib::utils;
 
 } // namespace
 
@@ -119,8 +121,16 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
         const std::string& parent_layer_name) {
     std::vector<ContainerLayer> res;
     res.emplace_back(base_path, parent_layer_name);
-    // todo: find out on disk
-    res.emplace_back(base_path, "c98833436817d72e5a11b062890502b31fd5cfcb7b5b5047bcf8cc430d7a2166");
+    auto json_file = std::string(base_path) + "\\" + parent_layer_name + "\\layerchain.json";
+    su::FileDescriptor fd{json_file, 'r'};
+    ss::JsonValue json = ss::load_json(fd);
+    std::cout << ss::dump_json_to_string(json) << std::endl;
+    for (auto& el : utils::get_json_array(json, json_file)) {
+        std::string path = utils::get_json_string(el, json_file);
+        std::string dir = su::strip_filename(path);
+        std::string file = su::strip_parent_dir(path);
+        res.emplace_back(dir, file);
+    }
     return res;
 }
 
