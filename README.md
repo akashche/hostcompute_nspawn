@@ -17,7 +17,8 @@ Current limitations:
 Download
 --------
 
-Download binary for Windows Server 2016: [hostcompute_nspawn.exe](TODO)
+ - binary for Windows Server 2016: [hostcompute_nspawn.exe](TODO)
+ - sha256: `de7cc2c97f9f49b8a22c8d63dccb857cc1f159fb98a005ceaa5a5624dd5bab8f`
 
 Usage example
 -------------
