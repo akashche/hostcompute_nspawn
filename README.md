@@ -17,7 +17,7 @@ Current limitations:
 Download
 --------
 
- - binary for Windows Server 2016: [hostcompute_nspawn.exe](TODO)
+ - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/1.0/hostcompute_nspawn.exe) (0.5MB)
  - sha256: `de7cc2c97f9f49b8a22c8d63dccb857cc1f159fb98a005ceaa5a5624dd5bab8f`
 
 Usage example
@@ -63,6 +63,8 @@ Specify the parameters in `config.json` file ([example](https://github.com/akash
  - `process_arguments`: arguments to executable
  - `mapped_directory`: mount point for `process_directory` inside the container
  - `stdout_filename`: relative path to `stdout` file that will be written into `process_directory`
+
+Process example:
 
     {
         "process_executable": "jdk/bin/java.exe",
