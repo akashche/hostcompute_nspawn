@@ -67,19 +67,19 @@ public:
         for (const ss::JsonField& fi : json.as_object()) {
             auto& name = fi.name();
             if ("process_directory" == name) {
-                this->process_directory = replace_slashes(utils::get_json_string(fi));
+                this->process_directory = replace_slashes(fi.as_string_or_throw(name));
             } else if ("process_executable" == name) {
-                this->process_executable = replace_slashes(utils::get_json_string(fi));
+                this->process_executable = replace_slashes(fi.as_string_or_throw(name));
             } else if ("process_arguments" == name) {
-                for (auto& ar : utils::get_json_array(fi)) {
-                    process_arguments.emplace_back(utils::get_json_string(ar, name));
+                for (auto& ar : fi.as_array_or_throw(name)) {
+                    process_arguments.emplace_back(ar.as_string_or_throw(name));
                 }
             } else if ("mapped_directory" == name) {
-                this->mapped_directory = replace_slashes(utils::get_json_string(fi));
+                this->mapped_directory = replace_slashes(fi.as_string_or_throw(name));
             } else if ("stdout_filename" == name) {
-                this->stdout_filename = replace_slashes(utils::get_json_string(fi));
+                this->stdout_filename = replace_slashes(fi.as_string_or_throw(name));
             } else if ("parent_layer_directory" == name) {
-                this->parent_layer_directory = replace_slashes(utils::get_json_string(fi));
+                this->parent_layer_directory = replace_slashes(fi.as_string_or_throw(name));
             } else {
                 throw NSpawnException(TRACEMSG("Unknown configuration field: [" + name + "]"));
             }

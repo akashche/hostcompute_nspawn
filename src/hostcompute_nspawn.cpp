@@ -148,8 +148,8 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
     su::FileDescriptor fd{ json_file, 'r' };
     ss::JsonValue json = ss::load_json(fd);
     std::cout << "Ascendant layers: " << ss::dump_json_to_string(json) << std::endl;
-    for (auto& el : utils::get_json_array(json, json_file)) {
-        std::string path = utils::get_json_string(el, json_file);
+    for (auto& el : json.as_array_or_throw(json_file)) {
+        std::string path = el.as_string_or_throw(json_file);
         std::string dir = su::strip_filename(path);
         std::string file = su::strip_parent_dir(path);
         res.emplace_back(dir, file);
@@ -430,7 +430,7 @@ void spawn_and_wait(const NSpawnConfig& config) {
  
 char* hostcompute_nspawn(const char* config_json, int config_json_len) /* noexcept */ {
     if (nullptr == config_json) return su::alloc_copy(TRACEMSG("Null 'config_json' parameter specified"));
-    if (!su::is_positive_uint32(config_json_len)) return su::alloc_copy(TRACEMSG(
+    if (!sc::is_uint32_positive(config_json_len)) return su::alloc_copy(TRACEMSG(
             "Invalid 'config_json_len' parameter specified: [" + sc::to_string(config_json_len) + "]"));
     try {
         auto src = si::array_source(config_json, config_json_len);
