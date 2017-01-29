@@ -21,13 +21,13 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
+#include "staticlib/ranges.hpp"
 #include "staticlib/serialization.hpp"
 
 #include "NSpawnException.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
-
 
 class ProcessConfig {
     std::string process_executable;
@@ -43,9 +43,11 @@ public:
     process_arguments(),
     mapped_directory(mapped_directory.data(), mapped_directory.length()),
     stdout_filename(stdout_filename.data(), stdout_filename.length()) {
-        for (auto& st : process_arguments) {
-            this->process_arguments.emplace_back(st.data(), st.length());
-        }
+        namespace sr = staticlib::ranges;
+        auto ra = sr::transform(sr::refwrap(process_arguments), [](const std::string& st) {
+            return std::string(st.data(), st.length());
+        });
+        sr::emplace_to(this->process_arguments, std::move(ra));
     }
 
     ProcessConfig(const ProcessConfig&) = delete;
@@ -54,38 +56,39 @@ public:
 
     ProcessConfig(ProcessConfig&& other):
     process_executable(std::move(other.process_executable)),
+    process_arguments(std::move(other.process_arguments)),
     mapped_directory(std::move(other.mapped_directory)),
     stdout_filename(std::move(stdout_filename)) { }
 
     ProcessConfig& operator=(ProcessConfig&& other) {
-        this->process_executable = std::move(other.process_executable);
-        this->mapped_directory = std::move(other.mapped_directory);
-        this->stdout_filename = std::move(other.stdout_filename);
+        process_executable = std::move(other.process_executable);
+        process_arguments = std::move(other.process_arguments);
+        mapped_directory = std::move(other.mapped_directory);
+        stdout_filename = std::move(other.stdout_filename);
         return *this;
     }
 
     staticlib::serialization::JsonValue to_json() const {
         namespace ss = staticlib::serialization;
-        std::vector<ss::JsonValue> console_dimensions;
-        std::vector<ss::JsonField> env;
-        std::string cline = std::string("C:\\Windows\\System32\\cmd.exe /c ") +
-                mapped_directory + "\\" + process_executable;
-        for (auto& ar : process_arguments) {
-            cline.append(" ");
-            cline.append(ar);
-        }
-        cline.append(std::string(" >> ") + stdout_filename + " 2>&1");
         return {
-            {"ApplicationName", ""}, 
-            {"CommandLine", cline},
-            {"User", ""},
-            {"WorkingDirectory", mapped_directory},
-            {"Environment", std::move(env)},
-            {"EmulateConsole", false},
-            {"CreateStdInPipe", false},
-            {"CreateStdOutPipe", false},
-            {"CreateStdErrPipe", false},
-            {"ConsoleSize", std::move(console_dimensions)}
+            { "ApplicationName", "" }, 
+            { "CommandLine", [this]() -> std::string {
+                auto cline = std::string("C:\\Windows\\System32\\cmd.exe /c ");
+                cline.append(mapped_directory).append("\\").append(process_executable);
+                for (auto& ar : process_arguments) {
+                    cline.append(" ").append(ar);
+                }
+                cline.append(" >> ").append(stdout_filename).append(" 2>&1");
+                return cline;
+            }() },
+            { "User", "" },
+            { "WorkingDirectory", mapped_directory },
+            { "Environment", std::vector<ss::JsonField>() },
+            { "EmulateConsole", false },
+            { "CreateStdInPipe", false },
+            { "CreateStdOutPipe", false },
+            { "CreateStdErrPipe", false },
+            { "ConsoleSize", std::vector<ss::JsonValue>() }
         };
     }
 };

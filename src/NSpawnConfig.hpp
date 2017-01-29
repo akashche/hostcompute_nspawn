@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
+#include "staticlib/ranges.hpp"
 #include "staticlib/serialization.hpp"
 
 #include "NSpawnException.hpp"
@@ -53,12 +54,12 @@ public:
     parent_layer_directory(std::move(other.parent_layer_directory)) { }
 
     NSpawnConfig& operator=(NSpawnConfig&& other) {
-        this->process_directory = std::move(other.process_directory);
-        this->process_executable = std::move(other.process_executable);
-        this->process_arguments = std::move(other.process_arguments);
-        this->mapped_directory = std::move(other.mapped_directory);
-        this->stdout_filename = std::move(other.stdout_filename);
-        this->parent_layer_directory = std::move(other.parent_layer_directory);
+        process_directory = std::move(other.process_directory);
+        process_executable = std::move(other.process_executable);
+        process_arguments = std::move(other.process_arguments);
+        mapped_directory = std::move(other.mapped_directory);
+        stdout_filename = std::move(other.stdout_filename);
+        parent_layer_directory = std::move(other.parent_layer_directory);
         return *this;
     }
 
@@ -84,18 +85,31 @@ public:
                 throw NSpawnException(TRACEMSG("Unknown configuration field: [" + name + "]"));
             }
         }
+        // validate
+        if (process_directory.empty()) throw NSpawnException(TRACEMSG(
+            "Invalid 'config.json' specified, 'process_directory' must be non-empty"));
+        if (process_executable.empty()) throw NSpawnException(TRACEMSG(
+            "Invalid 'config.json' specified, 'process_executable' must be non-empty"));
+        if (mapped_directory.empty()) throw NSpawnException(TRACEMSG(
+            "Invalid 'config.json' specified, 'mapped_directory' must be non-empty"));
+        if (stdout_filename.empty()) throw NSpawnException(TRACEMSG(
+            "Invalid 'config.json' specified, 'stdout_filename' must be non-empty"));
+        if (parent_layer_directory.empty()) throw NSpawnException(TRACEMSG(
+            "Invalid 'config.json' specified, 'parent_layer_directory' must be non-empty"));
     }
 
     staticlib::serialization::JsonValue to_json() const {
+        namespace sr = staticlib::ranges;
         namespace ss = staticlib::serialization;
-        std::vector<ss::JsonValue> args;
-        for (auto& ar : process_arguments) {
-            args.emplace_back(ar);
-        }
         return {
             { "process_directory", process_directory },
             { "process_executable", process_executable },
-            { "process_arguments", std::move(args) },
+            { "process_arguments", [this]() -> std::vector<ss::JsonValue> {
+                auto args = sr::transform(sr::refwrap(process_arguments), [](const std::string& ar) {
+                    return ss::JsonValue(ar);
+                });
+                return sr::emplace_to_vector(std::move(args));
+            }() },
 
             { "mapped_directory", mapped_directory },
             { "stdout_filename", stdout_filename },

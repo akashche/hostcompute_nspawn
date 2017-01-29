@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
+#include "staticlib/ranges.hpp"
 #include "staticlib/serialization.hpp"
 
 #include "ContainerLayer.hpp"
@@ -69,31 +70,19 @@ public:
     hostname(std::move(other.hostname)) { }
 
     ContainerConfig& operator=(ContainerConfig&& other) {
-        this->name = std::move(other.name);
-        this->process_dir = std::move(other.process_dir);
-        this->mapped_dir = std::move(other.mapped_dir);
-        this->volume_path = std::move(other.volume_path);
-        this->own_layer = std::move(other.own_layer);
-        this->parent_layers = std::move(other.parent_layers);
-        this->hostname = std::move(other.hostname);
+        name = std::move(other.name);
+        process_dir = std::move(other.process_dir);
+        mapped_dir = std::move(other.mapped_dir);
+        volume_path = std::move(other.volume_path);
+        own_layer = std::move(other.own_layer);
+        parent_layers = std::move(other.parent_layers);
+        hostname = std::move(other.hostname);
         return *this;
     }
 
     staticlib::serialization::JsonValue to_json() const {
+        namespace sr = staticlib::ranges;
         namespace ss = staticlib::serialization;
-        std::vector<ss::JsonValue> layers;
-        for (auto& la : parent_layers) {
-            layers.emplace_back(la.to_json());
-        }
-        std::vector<ss::JsonField> mappeddir;
-        mappeddir.emplace_back("HostPath", process_dir);
-        mappeddir.emplace_back("ContainerPath", mapped_dir);
-        mappeddir.emplace_back("ReadOnly", false);
-        mappeddir.emplace_back("BandwidthMaximum", 0);
-        mappeddir.emplace_back("IOPSMaximum", 0);
-        std::vector<ss::JsonValue> mdirs;
-        mdirs.emplace_back(std::move(mappeddir));
-
         return {
             { "SystemType", "Container" },
             { "Name", name },
@@ -102,9 +91,25 @@ public:
             { "VolumePath", volume_path },
             { "IgnoreFlushesDuringBoot", true },
             { "LayerFolderPath", own_layer.get_path() },
-            { "Layers", std::move(layers) },
+            { "Layers", [this]() -> std::vector<ss::JsonValue> {
+                auto ra = sr::transform(sr::refwrap(parent_layers), [](const ContainerLayer& la) {
+                    return la.to_json();
+                });
+                return sr::emplace_to_vector(std::move(ra));
+            }() },
             { "HostName", hostname },
-            { "MappedDirectories", std::move(mdirs) },
+            { "MappedDirectories", [this]() -> std::vector<ss::JsonValue> {
+                ss::JsonValue mappeddir = {
+                    { "HostPath", process_dir },
+                    { "ContainerPath", mapped_dir },
+                    { "ReadOnly", false },
+                    { "BandwidthMaximum", 0 },
+                    { "IOPSMaximum", 0 },
+                };
+                std::vector<ss::JsonValue> res;
+                res.emplace_back(std::move(mappeddir));
+                return res;
+            }() },
             { "HvPartition", false },
             { "EndpointList", std::vector<ss::JsonValue>() },
             { "Servicing", false },
