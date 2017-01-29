@@ -17,6 +17,7 @@
 #include "utils.hpp"
 
 #include <ctime>
+#include <chrono>
 
 #include "staticlib/utils.hpp"
 
@@ -30,9 +31,9 @@ namespace su = staticlib::utils;
 
 } //namespace
 
-// todo: use chrono
 std::string current_datetime() {
-    time_t cur = time(NULL);
+    auto now = std::chrono::system_clock::now();
+    auto cur = std::chrono::system_clock::to_time_t(now);
     struct tm time;
     localtime_s(&time, &cur);
     char tmpbuf[128];
