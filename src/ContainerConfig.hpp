@@ -51,9 +51,11 @@ public:
     own_layer(std::move(own_layer)),
     parent_layers(),
     hostname(std::move(hostname)) {
-        for (auto& la : parent_layers) {
-            this->parent_layers.emplace_back(la.clone());
-        }
+        namespace sr = staticlib::ranges;
+        auto ra = sr::transform(sr::refwrap(parent_layers), [](const ContainerLayer& la) {
+            return la.clone();
+        });
+        sr::emplace_to(this->parent_layers, std::move(ra));
     }
 
     ContainerConfig(const ContainerConfig&) = delete;
