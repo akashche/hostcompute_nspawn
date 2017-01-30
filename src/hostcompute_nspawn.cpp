@@ -19,12 +19,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <algorithm>
-#include <atomic>
-#include <chrono>
-#include <condition_variable>
 #include <iostream>
-#include <mutex>
-#include <thread>
 
 #include "staticlib/config.hpp"
 #include "staticlib/io.hpp"
@@ -33,11 +28,13 @@
 #include "staticlib/tinydir.hpp"
 #include "staticlib/utils.hpp"
 
-#include "NSpawnConfig.hpp"
-#include "NSpawnException.hpp"
+#include "CallbackLatch.hpp"
 #include "ContainerConfig.hpp"
 #include "ContainerId.hpp"
 #include "ContainerLayer.hpp"
+#include "NotificationType.hpp"
+#include "NSpawnConfig.hpp"
+#include "NSpawnException.hpp"
 #include "ProcessConfig.hpp"
 
 
@@ -56,86 +53,6 @@ namespace nspawn {
 
 enum class HcsErrors : uint32_t {
     OPERATION_PENDING = 0xC0370103
-};
-
-enum class NotificationType : uint32_t {
-    // Notifications for HCS_SYSTEM handles
-    SYSTEM_EXIT = 0x00000001,
-    SYSTEM_CREATE_COMPLETE = 0x00000002,
-    SYSTEM_START_COMPLETE = 0x00000003,
-    SYSTEM_PAUSE_COMPLETE = 0x00000004,
-    SYSTEM_RESUME_COMPLETE = 0x00000005,
-
-    // Notifications for HCS_PROCESS handles
-    PROCESS_EXIT = 0x00010000,
-
-    // Common notifications
-    COMMON_INVALID = 0x00000000,
-    COMMON_SERVICE_DISCONNECT = 0x01000000
-};
-
-class CallbackLatch {
-    std::mutex mutex;
-    std::condition_variable system_create_cv;
-    std::atomic<bool> system_create_flag = false;
-    std::condition_variable system_start_cv;
-    std::atomic<bool> system_start_flag = false;
-    std::condition_variable system_exit_cv;
-    std::atomic<bool> system_exit_flag = false;
-    std::condition_variable process_exit_cv;
-    std::atomic<bool> process_exit_flag = false;
-
-public:
-    CallbackLatch() { }
-
-    CallbackLatch(const CallbackLatch&) = delete;
-
-    CallbackLatch& operator=(const CallbackLatch&) = delete;
-
-    void lock() {
-        std::unique_lock<std::mutex> guard{ mutex };
-        guard.release();
-    }
-
-    void await(NotificationType nt) {
-        switch (nt) {
-        case NotificationType::SYSTEM_CREATE_COMPLETE: await_internal(system_create_cv, system_create_flag); break;
-        case NotificationType::SYSTEM_START_COMPLETE: await_internal(system_start_cv, system_start_flag); break;
-        case NotificationType::SYSTEM_EXIT: await_internal(system_exit_cv, system_exit_flag); break;
-        case NotificationType::PROCESS_EXIT: await_internal(process_exit_cv, process_exit_flag); break;
-        default: throw NSpawnException(TRACEMSG("Unsupported notification type"));
-        }
-    }
-
-    void unlock(NotificationType nt) {
-        switch (nt) {
-        case NotificationType::SYSTEM_CREATE_COMPLETE: unlock_internal(system_create_cv, system_create_flag); break;
-        case NotificationType::SYSTEM_START_COMPLETE: unlock_internal(system_start_cv, system_start_flag); break;
-        case NotificationType::SYSTEM_EXIT: unlock_internal(system_exit_cv, system_exit_flag); break;
-        case NotificationType::PROCESS_EXIT: unlock_internal(process_exit_cv, process_exit_flag); break;
-        default: { /* ignore */ }
-        }
-    }
-
-    void cancel() {
-        std::unique_lock<std::mutex> guard{ mutex, std::adopt_lock };
-    }
-
-private:
-    void await_internal(std::condition_variable& cv, std::atomic<bool>& flag) {
-        std::unique_lock<std::mutex> guard{mutex, std::adopt_lock};
-        cv.wait(guard, [&flag]{
-            return flag.load();
-        });
-    }
-
-    void unlock_internal(std::condition_variable& cv, std::atomic<bool>& flag) {
-        static bool the_false = false;
-        if (flag.compare_exchange_strong(the_false, true)) {
-            std::unique_lock<std::mutex> guard{mutex};
-            cv.notify_all();
-        }
-    }
 };
 
 DriverInfo create_driver_info(const std::wstring& wide_base_path) {
@@ -405,16 +322,20 @@ void spawn_and_wait(const NSpawnConfig& config) {
     auto acsendant_layers = collect_acsendant_layers(base_path, parent_layer_name);
     auto acsendant_descriptors = create_ascendant_descriptors(acsendant_layers);
 
-    // prepare new layer
+    // create layer
     auto layer = ContainerLayer(base_path, std::string("nspawn_") + utils::current_datetime() + "_" + rng.generate(26));
     hcs_create_layer(driver_info, layer, parent_layer_name, acsendant_descriptors);
     auto deferred_destroy_layer = sc::defer([&driver_info, &layer]() STATICLIB_NOEXCEPT {
         hcs_destroy_layer(driver_info, layer);
     });
+
+    // activate layer
     hcs_activate_layer(driver_info, layer);
     auto deferred_deactivate_layer = sc::defer([&driver_info, &layer]() STATICLIB_NOEXCEPT {
         hcs_deactivate_layer(driver_info, layer);
     });
+
+    // prepare layer
     hcs_prepare_layer(driver_info, layer, acsendant_descriptors);
     auto deferred_unprepare_layer = sc::defer([&driver_info, &layer]() STATICLIB_NOEXCEPT {
         hcs_unprepare_layer(driver_info, layer);
@@ -426,6 +347,8 @@ void spawn_and_wait(const NSpawnConfig& config) {
         volume_path, layer.clone(), acsendant_layers, rng.generate(8));
     std::cout << "Container config: " << ss::dump_json_to_string(container_config.to_json()) << std::endl;
     HANDLE compute_system = hcs_create_compute_system(container_config, layer);
+
+    // register callback and wait for container to start
     CallbackLatch cs_latch;
     hcs_register_compute_system_callback(compute_system, layer, cs_latch);
     hcs_start_compute_system(compute_system, layer, cs_latch);

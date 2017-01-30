@@ -66,9 +66,11 @@ add_executable ( ${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/vmcompute.cpp
         # headers
         ${CMAKE_CURRENT_LIST_DIR}/include/hostcompute_nspawn.h
+        ${CMAKE_CURRENT_LIST_DIR}/src/CallbackLatch.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ContainerConfig.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ContainerId.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ContainerLayer.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/NotificationType.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/NSpawnConfig.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/NSpawnException.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ProcessConfig.hpp
