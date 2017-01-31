@@ -11,15 +11,15 @@ directory inside the isolated container environment.
 Current limitations:
 
  - no base images handling (not easy to solve as Windows images are not free, Docker can be used to pull the initial image)
- - no console support (`stdout` is redirected into file inside mounted directory)
+ - no console support (`stdout` is redirected into the file inside mounted directory)
  - no networking support (should be easy to add)
- - no RAM/CPU/IOPS limits (should be easy to add)
+ - no ~~RAM/CPU/~~IOPS limits (RAM/CPU now supported with `max_ram_mb` and `cpus_count`)
 
 Download
 --------
 
- - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/1.0/hostcompute_nspawn.exe) (0.5MB)
- - sha256: `de7cc2c97f9f49b8a22c8d63dccb857cc1f159fb98a005ceaa5a5624dd5bab8f`
+ - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/1.1/hostcompute_nspawn.exe) (0.6MB)
+ - sha256: `84ed5ec2f235c4a4873d3f0f34f8d881714885d19a81838770b9f78730ae62b3`
 
 Usage example
 -------------
@@ -62,6 +62,8 @@ Specify the parameters in `config.json` file ([example](https://github.com/akash
  - `process_directory`: host directory that will be mounted into containert
  - `process_executable`: relative path to executable to run inside the container
  - `process_arguments`: arguments to executable
+ - `max_ram_mb`: max amount of RAM in megabytes allowed
+ - `cpus_count`: max number of CPU cores allowed (it looks like HCS doesn't actually enforce it)
  - `mapped_directory`: mount point for `process_directory` inside the container
  - `stdout_filename`: relative path to `stdout` file that will be written into `process_directory`
 
@@ -91,7 +93,7 @@ How to build
 [pkg-config](http://www.freedesktop.org/wiki/Software/pkg-config/) utility is used for dependency management.
 Ready-to-use binary version of `pkg-config` can be obtained from [tools_windows_pkgconfig](https://github.com/staticlibs/tools_windows_pkgconfig) repository.
 
-To build the library on Windows using Visual Studio 2013 Express run the following commands using
+To build this utility using Visual Studio 2013 Express run the following commands using
 Visual Studio development command prompt 
 (`C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\Shortcuts\VS2013 x64 Cross Tools Command Prompt`):
 
@@ -109,6 +111,12 @@ This project is released under the [Apache License 2.0](http://www.apache.org/li
 
 Changelog
 ---------
+
+**2017-01-31**
+
+ * version `1.1`
+ * RAM and CPU cores limits support
+ * correct rollback behaviour on errors
 
 **2017-01-26**
 

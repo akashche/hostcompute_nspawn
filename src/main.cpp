@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 
     // show help
     if (opts.help) {
-        std::cout << "hostcompute_nspawn v1.0" << std::endl;
+        std::cout << "hostcompute_nspawn v1.1" << std::endl;
         poptPrintHelp(opts.ctx, stdout, 0);
         std::exit(0);
     }
