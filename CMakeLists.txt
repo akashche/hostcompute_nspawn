@@ -89,6 +89,8 @@ target_link_libraries ( ${PROJECT_NAME}
 
 set_property ( TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS "/manifest:no" )
 
+# test
 add_executable ( hello ${CMAKE_CURRENT_LIST_DIR}/test/hello.cpp )
 add_executable ( mem ${CMAKE_CURRENT_LIST_DIR}/test/mem.cpp )
+add_executable ( cores ${CMAKE_CURRENT_LIST_DIR}/test/cores.cpp )
 

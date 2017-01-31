@@ -343,8 +343,9 @@ void spawn_and_wait(const NSpawnConfig& config) {
     std::string volume_path = hcs_get_layer_mount_path(driver_info, layer);
 
     // create and start container
-    auto container_config = ContainerConfig(base_path, config.process_directory, config.max_ram_mb,
-            config.mapped_directory, volume_path, layer.clone(), acsendant_layers, rng.generate(8));
+    auto container_config = ContainerConfig(base_path, config.process_directory,
+            config.max_ram_mb, config.cpus_count, config.mapped_directory,
+            volume_path, layer.clone(), acsendant_layers, rng.generate(8));
     std::cout << "Container config: " << ss::dump_json_to_string(container_config.to_json()) << std::endl;
     HANDLE compute_system = hcs_create_compute_system(container_config, layer);
 

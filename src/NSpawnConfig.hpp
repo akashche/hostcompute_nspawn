@@ -37,6 +37,7 @@ public:
     std::vector<std::string> process_arguments;
     
     uint32_t max_ram_mb = 0;
+    uint16_t cpus_count = 0;
 
     std::string mapped_directory;
     std::string stdout_filename;
@@ -52,10 +53,12 @@ public:
     process_executable(std::move(other.process_executable)),
     process_arguments(std::move(other.process_arguments)),
     max_ram_mb(other.max_ram_mb),
+    cpus_count(other.cpus_count),
     mapped_directory(std::move(other.mapped_directory)),
     stdout_filename(std::move(other.stdout_filename)),
     parent_layer_directory(std::move(other.parent_layer_directory)) {
         other.max_ram_mb = 0;
+        other.cpus_count = 0;
     }
 
     NSpawnConfig& operator=(NSpawnConfig&& other) {
@@ -64,6 +67,8 @@ public:
         process_arguments = std::move(other.process_arguments);
         max_ram_mb = other.max_ram_mb;
         other.max_ram_mb = 0;
+        cpus_count = other.cpus_count;
+        other.cpus_count = 0;
         mapped_directory = std::move(other.mapped_directory);
         stdout_filename = std::move(other.stdout_filename);
         parent_layer_directory = std::move(other.parent_layer_directory);
@@ -84,6 +89,8 @@ public:
                 }
             } else if ("max_ram_mb" == name) {
                 max_ram_mb = fi.as_uint32_or_throw(name);
+            } else if ("cpus_count" == name) {
+                cpus_count = fi.as_uint16_or_throw(name);
             } else if ("mapped_directory" == name) {
                 mapped_directory = replace_slashes(fi.as_string_or_throw(name));
             } else if ("stdout_filename" == name) {
@@ -121,6 +128,7 @@ public:
             }() },
 
             { "max_ram_mb", max_ram_mb },
+            { "cpus_count", cpus_count },
 
             { "mapped_directory", mapped_directory },
             { "stdout_filename", stdout_filename },
