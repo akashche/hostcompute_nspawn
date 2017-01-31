@@ -3,9 +3,10 @@
     "process_executable": "hello.exe",
     "process_arguments": ["foo", "bar", "baz"],
 
+    "max_ram_mb": 512,
+
     "mapped_directory": "c:/nspawndir",
     "stdout_filename": "nspawn_out.txt",
 
-    "parent_layer_directory": "C:/ProgramData/docker/windowsfilter/5e42c3f35fcfbabd197bc958f2fdfbc424976ee938b1d962627740b766608308"
-
+    "parent_layer_directory": "C:/ProgramData/docker/windowsfilter/4620a187e5bb15ae117ff046006df40839fa554f9308eedd1dc35c55acf397ea"
 }

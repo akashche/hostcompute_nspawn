@@ -36,6 +36,8 @@ public:
     std::string process_executable;
     std::vector<std::string> process_arguments;
     
+    uint32_t max_ram_mb = 0;
+
     std::string mapped_directory;
     std::string stdout_filename;
 
@@ -49,14 +51,19 @@ public:
     process_directory(std::move(other.process_directory)),
     process_executable(std::move(other.process_executable)),
     process_arguments(std::move(other.process_arguments)),
+    max_ram_mb(other.max_ram_mb),
     mapped_directory(std::move(other.mapped_directory)),
     stdout_filename(std::move(other.stdout_filename)),
-    parent_layer_directory(std::move(other.parent_layer_directory)) { }
+    parent_layer_directory(std::move(other.parent_layer_directory)) {
+        other.max_ram_mb = 0;
+    }
 
     NSpawnConfig& operator=(NSpawnConfig&& other) {
         process_directory = std::move(other.process_directory);
         process_executable = std::move(other.process_executable);
         process_arguments = std::move(other.process_arguments);
+        max_ram_mb = other.max_ram_mb;
+        other.max_ram_mb = 0;
         mapped_directory = std::move(other.mapped_directory);
         stdout_filename = std::move(other.stdout_filename);
         parent_layer_directory = std::move(other.parent_layer_directory);
@@ -68,19 +75,21 @@ public:
         for (const ss::JsonField& fi : json.as_object()) {
             auto& name = fi.name();
             if ("process_directory" == name) {
-                this->process_directory = replace_slashes(fi.as_string_or_throw(name));
+                process_directory = replace_slashes(fi.as_string_or_throw(name));
             } else if ("process_executable" == name) {
-                this->process_executable = replace_slashes(fi.as_string_or_throw(name));
+                process_executable = replace_slashes(fi.as_string_or_throw(name));
             } else if ("process_arguments" == name) {
                 for (auto& ar : fi.as_array_or_throw(name)) {
                     process_arguments.emplace_back(ar.as_string_or_throw(name));
                 }
+            } else if ("max_ram_mb" == name) {
+                max_ram_mb = fi.as_uint32_or_throw(name);
             } else if ("mapped_directory" == name) {
-                this->mapped_directory = replace_slashes(fi.as_string_or_throw(name));
+                mapped_directory = replace_slashes(fi.as_string_or_throw(name));
             } else if ("stdout_filename" == name) {
-                this->stdout_filename = replace_slashes(fi.as_string_or_throw(name));
+                stdout_filename = replace_slashes(fi.as_string_or_throw(name));
             } else if ("parent_layer_directory" == name) {
-                this->parent_layer_directory = replace_slashes(fi.as_string_or_throw(name));
+                parent_layer_directory = replace_slashes(fi.as_string_or_throw(name));
             } else {
                 throw NSpawnException(TRACEMSG("Unknown configuration field: [" + name + "]"));
             }
@@ -110,6 +119,8 @@ public:
                 });
                 return sr::emplace_to_vector(std::move(args));
             }() },
+
+            { "max_ram_mb", max_ram_mb },
 
             { "mapped_directory", mapped_directory },
             { "stdout_filename", stdout_filename },
