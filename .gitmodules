@@ -22,9 +22,6 @@
 [submodule "deps/staticlib_serialization"]
 	path = deps/staticlib_serialization
 	url = https://github.com/staticlibs/staticlib_serialization.git
-[submodule "deps/staticlib_pimpl"]
-	path = deps/staticlib_pimpl
-	url = https://github.com/staticlibs/staticlib_pimpl.git
 [submodule "deps/staticlib_tinydir"]
 	path = deps/staticlib_tinydir
 	url = https://github.com/staticlibs/staticlib_tinydir.git
