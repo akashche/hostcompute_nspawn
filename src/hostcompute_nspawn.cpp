@@ -68,8 +68,8 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
     std::vector<ContainerLayer> res;
     res.emplace_back(base_path, parent_layer_name);
     auto json_file = std::string(base_path) + "\\" + parent_layer_name + "\\layerchain.json";
-    auto fd = su::FileDescriptor(json_file, 'r');
-    auto json = ss::load_json(fd);
+    auto src = st::TinydirFileSource(json_file);
+    auto json = ss::load_json(src);
     std::cout << "Ascendant layers: " << ss::dump_json_to_string(json) << std::endl;
     for (auto& el : json.as_array_or_throw(json_file)) {
         std::string path = el.as_string_or_throw(json_file);

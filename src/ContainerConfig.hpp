@@ -111,7 +111,7 @@ public:
                 auto ra = sr::transform(sr::refwrap(parent_layers), [](const ContainerLayer& la) {
                     return la.to_json();
                 });
-                return sr::emplace_to_vector(std::move(ra));
+                return ra.to_vector();
             }() },
             { "ProcessorCount", cpus_count },
             { "MemoryMaximumInMB", max_ram_mb },

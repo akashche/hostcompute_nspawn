@@ -124,7 +124,7 @@ public:
                 auto args = sr::transform(sr::refwrap(process_arguments), [](const std::string& ar) {
                     return ss::JsonValue(ar);
                 });
-                return sr::emplace_to_vector(std::move(args));
+                return args.to_vector();
             }() },
 
             { "max_ram_mb", max_ram_mb },

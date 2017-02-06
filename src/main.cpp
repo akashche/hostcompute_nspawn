@@ -22,6 +22,7 @@
 
 #include "staticlib/config.hpp"
 #include "staticlib/io.hpp"
+#include "staticlib/tinydir.hpp"
 #include "staticlib/utils.hpp"
 
 #include "hostcompute_nspawn.h"
@@ -31,6 +32,7 @@ namespace { // anonymous
 
 namespace si = staticlib::io;
 namespace su = staticlib::utils;
+namespace st = staticlib::tinydir;
 
 class Options {
     std::vector<struct poptOption> table;
@@ -117,10 +119,10 @@ std::string default_config_path() {
 }
 
 std::string read_config(const std::string& config_path) {
-    auto fd = su::FileDescriptor(config_path, 'r');
+    auto src = st::TinydirFileSource(config_path);
     auto sink = si::string_sink();
     std::array<char, 4096> buf;
-    si::copy_all(fd, sink, buf.data(), buf.size());
+    si::copy_all(src, sink, buf);
     return sink.get_string();
 }
 
