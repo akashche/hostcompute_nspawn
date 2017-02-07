@@ -119,7 +119,7 @@ std::string default_config_path() {
 }
 
 std::string read_config(const std::string& config_path) {
-    auto src = st::TinydirFileSource(config_path);
+    auto src = st::file_source(config_path);
     auto sink = si::string_sink();
     std::array<char, 4096> buf;
     si::copy_all(src, sink, buf);

@@ -96,7 +96,7 @@ public:
         return *this;
     }
 
-    staticlib::serialization::JsonValue to_json() const {
+    staticlib::serialization::json_value to_json() const {
         namespace sr = staticlib::ranges;
         namespace ss = staticlib::serialization;
         return {
@@ -107,7 +107,7 @@ public:
             { "VolumePath", volume_path },
             { "IgnoreFlushesDuringBoot", true },
             { "LayerFolderPath", own_layer.get_path() },
-            { "Layers", [this]() -> std::vector<ss::JsonValue> {
+            { "Layers", [this]() -> std::vector<ss::json_value> {
                 auto ra = sr::transform(sr::refwrap(parent_layers), [](const ContainerLayer& la) {
                     return la.to_json();
                 });
@@ -116,20 +116,20 @@ public:
             { "ProcessorCount", cpus_count },
             { "MemoryMaximumInMB", max_ram_mb },
             { "HostName", hostname },
-            { "MappedDirectories", [this]() -> std::vector<ss::JsonValue> {
-                ss::JsonValue mappeddir = {
+            { "MappedDirectories", [this]() -> std::vector<ss::json_value> {
+                ss::json_value mappeddir = {
                     { "HostPath", process_dir },
                     { "ContainerPath", mapped_dir },
                     { "ReadOnly", false },
                     { "BandwidthMaximum", 0 },
                     { "IOPSMaximum", 0 },
                 };
-                std::vector<ss::JsonValue> res;
+                std::vector<ss::json_value> res;
                 res.emplace_back(std::move(mappeddir));
                 return res;
             }() },
             { "HvPartition", false },
-            { "EndpointList", std::vector<ss::JsonValue>() },
+            { "EndpointList", std::vector<ss::json_value>() },
             { "Servicing", false },
             { "AllowUnqualifiedDNSQuery", true }
         };

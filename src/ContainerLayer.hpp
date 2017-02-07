@@ -66,7 +66,7 @@ public:
         return std::string(base_path) + id.get_name();
     }
 
-    staticlib::serialization::JsonValue to_json() const {
+    staticlib::serialization::json_value to_json() const {
         return {
             { "ID", id.to_id() },
             { "Path", get_path() }

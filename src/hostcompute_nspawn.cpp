@@ -68,7 +68,7 @@ std::vector<ContainerLayer> collect_acsendant_layers(const std::string& base_pat
     std::vector<ContainerLayer> res;
     res.emplace_back(base_path, parent_layer_name);
     auto json_file = std::string(base_path) + "\\" + parent_layer_name + "\\layerchain.json";
-    auto src = st::TinydirFileSource(json_file);
+    auto src = st::file_source(json_file);
     auto json = ss::load_json(src);
     std::cout << "Ascendant layers: " << ss::dump_json_to_string(json) << std::endl;
     for (auto& el : json.as_array_or_throw(json_file)) {
@@ -310,7 +310,7 @@ void spawn_and_wait(const NSpawnConfig& config) {
     std::cout << "NSpawn config: " << ss::dump_json_to_string(config.to_json()) << std::endl;
 
     // common parameters
-    auto rng = su::RandomStringGenerator("0123456789abcdef");
+    auto rng = su::random_string_generator("0123456789abcdef");
     std::string base_path = su::strip_filename(config.parent_layer_directory);
     std::wstring wide_base_path = su::widen(base_path);
     std::string parent_layer_name = su::strip_parent_dir(config.parent_layer_directory);

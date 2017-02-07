@@ -68,7 +68,7 @@ public:
         return *this;
     }
 
-    staticlib::serialization::JsonValue to_json() const {
+    staticlib::serialization::json_value to_json() const {
         namespace ss = staticlib::serialization;
         return {
             { "ApplicationName", "" }, 
@@ -83,12 +83,12 @@ public:
             }() },
             { "User", "" },
             { "WorkingDirectory", mapped_directory },
-            { "Environment", std::vector<ss::JsonField>() },
+            { "Environment", std::vector<ss::json_field>() },
             { "EmulateConsole", false },
             { "CreateStdInPipe", false },
             { "CreateStdOutPipe", false },
             { "CreateStdErrPipe", false },
-            { "ConsoleSize", std::vector<ss::JsonValue>() }
+            { "ConsoleSize", std::vector<ss::json_value>() }
         };
     }
 };

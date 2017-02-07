@@ -75,9 +75,9 @@ public:
         return *this;
     }
 
-    NSpawnConfig(const staticlib::serialization::JsonValue& json) {
+    NSpawnConfig(const staticlib::serialization::json_value& json) {
         namespace ss = staticlib::serialization;
-        for (const ss::JsonField& fi : json.as_object()) {
+        for (const ss::json_field& fi : json.as_object()) {
             auto& name = fi.name();
             if ("process_directory" == name) {
                 process_directory = replace_slashes(fi.as_string_or_throw(name));
@@ -114,15 +114,15 @@ public:
             "Invalid 'config.json' specified, 'parent_layer_directory' must be non-empty"));
     }
 
-    staticlib::serialization::JsonValue to_json() const {
+    staticlib::serialization::json_value to_json() const {
         namespace sr = staticlib::ranges;
         namespace ss = staticlib::serialization;
         return {
             { "process_directory", process_directory },
             { "process_executable", process_executable },
-            { "process_arguments", [this]() -> std::vector<ss::JsonValue> {
+            { "process_arguments", [this]() -> std::vector<ss::json_value> {
                 auto args = sr::transform(sr::refwrap(process_arguments), [](const std::string& ar) {
-                    return ss::JsonValue(ar);
+                    return ss::json_value(ar);
                 });
                 return args.to_vector();
             }() },
