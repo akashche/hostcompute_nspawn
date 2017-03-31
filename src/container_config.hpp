@@ -97,9 +97,10 @@ public:
                 });
                 return ra.to_vector();
             }() },
+            { "MemoryMaximumInMB", nconf->max_ram_mb },
             { "ProcessorCount", nconf->cpus_count },
             { "ProcessorMaximum", nconf->max_cpu_percent * 100 },
-            { "MemoryMaximumInMB", nconf->max_ram_mb },
+            { "StorageIOPSMaximum", nconf->max_iops },
             { "HostName", hostname },
             { "MappedDirectories", [this]() -> std::vector<ss::json_value> {
                 ss::json_value mappeddir = {
@@ -107,7 +108,7 @@ public:
                     { "ContainerPath", nconf->mapped_directory },
                     { "ReadOnly", false },
                     { "BandwidthMaximum", 0 },
-                    { "IOPSMaximum", 0 },
+                    { "IOPSMaximum", nconf->max_iops },
                 };
                 std::vector<ss::json_value> res;
                 res.emplace_back(std::move(mappeddir));

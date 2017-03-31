@@ -39,6 +39,7 @@ public:
     uint32_t max_ram_mb = 0;
     uint16_t cpus_count = 0;
 	uint16_t max_cpu_percent = 0;
+    uint32_t max_iops = 0;
 
     std::string mapped_directory;
     std::string stdout_filename;
@@ -56,6 +57,7 @@ public:
     max_ram_mb(other.max_ram_mb),
     cpus_count(other.cpus_count),
 	max_cpu_percent(other.max_cpu_percent),
+    max_iops(other.max_iops),
     mapped_directory(std::move(other.mapped_directory)),
     stdout_filename(std::move(other.stdout_filename)),
     parent_layer_directory(std::move(other.parent_layer_directory)) {
@@ -73,6 +75,8 @@ public:
         other.cpus_count = 0;
 		max_cpu_percent = other.max_cpu_percent;
 		other.max_cpu_percent = 0;
+        max_iops = other.max_iops;
+        other.max_iops = 0;
         mapped_directory = std::move(other.mapped_directory);
         stdout_filename = std::move(other.stdout_filename);
         parent_layer_directory = std::move(other.parent_layer_directory);
@@ -97,6 +101,8 @@ public:
                 cpus_count = fi.as_uint16_or_throw(name);
 			} else if ("max_cpu_percent" == name) {
 				max_cpu_percent = fi.as_uint16_or_throw(name);
+            } else if ("max_iops" == name) {
+                max_iops = fi.as_uint32_or_throw(name);
             } else if ("mapped_directory" == name) {
                 mapped_directory = replace_slashes(fi.as_string_or_throw(name));
             } else if ("stdout_filename" == name) {
