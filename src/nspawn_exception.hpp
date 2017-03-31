@@ -26,19 +26,19 @@ namespace nspawn {
 /**
  * Module specific exception
  */
-class NSpawnException : public staticlib::config::staticlib_exception {
+class nspawn_exception : public staticlib::config::staticlib_exception {
 public:
     /**
      * Default constructor
      */
-    NSpawnException() = default;
+    nspawn_exception() = default;
 
     /**
      * Constructor with message
      * 
      * @param msg error message
      */
-    NSpawnException(const std::string& msg) :
+    nspawn_exception(const std::string& msg) :
     staticlib::config::staticlib_exception(msg) { }
 
 };

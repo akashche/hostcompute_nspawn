@@ -26,7 +26,7 @@
 #include "staticlib/utils.hpp"
 
 #include "hostcompute_nspawn.h"
-#include "NSpawnException.hpp"
+#include "nspawn_exception.hpp"
 
 namespace { // anonymous
 

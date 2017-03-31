@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef NSPAWN_NSPAWNCONFIG_HPP
-#define	NSPAWN_NSPAWNCONFIG_HPP
+#ifndef NSPAWN_NSPAWN_CONFIG_HPP
+#define	NSPAWN_NSPAWN_CONFIG_HPP
 
 #include <algorithm>
 #include <string>
@@ -25,12 +25,12 @@
 #include "staticlib/ranges.hpp"
 #include "staticlib/serialization.hpp"
 
-#include "NSpawnException.hpp"
+#include "nspawn_exception.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
 
-class NSpawnConfig {
+class nspawn_config {
 public:
     std::string process_directory;
     std::string process_executable;
@@ -44,11 +44,11 @@ public:
 
     std::string parent_layer_directory;
 
-    NSpawnConfig(const NSpawnConfig&) = delete;
+    nspawn_config(const nspawn_config&) = delete;
 
-    NSpawnConfig& operator=(const NSpawnConfig&) = delete;
+    nspawn_config& operator=(const nspawn_config&) = delete;
 
-    NSpawnConfig(NSpawnConfig&& other):
+    nspawn_config(nspawn_config&& other):
     process_directory(std::move(other.process_directory)),
     process_executable(std::move(other.process_executable)),
     process_arguments(std::move(other.process_arguments)),
@@ -61,7 +61,7 @@ public:
         other.cpus_count = 0;
     }
 
-    NSpawnConfig& operator=(NSpawnConfig&& other) {
+    nspawn_config& operator=(nspawn_config&& other) {
         process_directory = std::move(other.process_directory);
         process_executable = std::move(other.process_executable);
         process_arguments = std::move(other.process_arguments);
@@ -75,7 +75,7 @@ public:
         return *this;
     }
 
-    NSpawnConfig(const staticlib::serialization::json_value& json) {
+    nspawn_config(const staticlib::serialization::json_value& json) {
         namespace ss = staticlib::serialization;
         for (const ss::json_field& fi : json.as_object()) {
             auto& name = fi.name();
@@ -98,19 +98,19 @@ public:
             } else if ("parent_layer_directory" == name) {
                 parent_layer_directory = replace_slashes(fi.as_string_or_throw(name));
             } else {
-                throw NSpawnException(TRACEMSG("Unknown configuration field: [" + name + "]"));
+                throw nspawn_exception(TRACEMSG("Unknown configuration field: [" + name + "]"));
             }
         }
         // validate
-        if (process_directory.empty()) throw NSpawnException(TRACEMSG(
+        if (process_directory.empty()) throw nspawn_exception(TRACEMSG(
             "Invalid 'config.json' specified, 'process_directory' must be non-empty"));
-        if (process_executable.empty()) throw NSpawnException(TRACEMSG(
+        if (process_executable.empty()) throw nspawn_exception(TRACEMSG(
             "Invalid 'config.json' specified, 'process_executable' must be non-empty"));
-        if (mapped_directory.empty()) throw NSpawnException(TRACEMSG(
+        if (mapped_directory.empty()) throw nspawn_exception(TRACEMSG(
             "Invalid 'config.json' specified, 'mapped_directory' must be non-empty"));
-        if (stdout_filename.empty()) throw NSpawnException(TRACEMSG(
+        if (stdout_filename.empty()) throw nspawn_exception(TRACEMSG(
             "Invalid 'config.json' specified, 'stdout_filename' must be non-empty"));
-        if (parent_layer_directory.empty()) throw NSpawnException(TRACEMSG(
+        if (parent_layer_directory.empty()) throw nspawn_exception(TRACEMSG(
             "Invalid 'config.json' specified, 'parent_layer_directory' must be non-empty"));
     }
 
@@ -146,4 +146,4 @@ private:
 
 } // namespace
 
-#endif // NSPAWN_NSPAWNCONFIG_HPP
+#endif // NSPAWN_NSPAWN_CONFIG_HPP

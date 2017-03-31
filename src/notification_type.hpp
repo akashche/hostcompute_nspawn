@@ -15,29 +15,29 @@
  */
 
 
-#ifndef NSPAWN_NOTIFICATIONTYPE_HPP
-#define	NSPAWN_NOTIFICATIONTYPE_HPP
+#ifndef NSPAWN_NOTIFICATION_TYPE_HPP
+#define	NSPAWN_NOTIFICATION_TYPE_HPP
 
 #include <cstdint>
 
 namespace nspawn {
 
-enum class NotificationType : uint32_t {
+enum class notification_type : uint32_t {
     // Notifications for HCS_SYSTEM handles
-    SYSTEM_EXIT = 0x00000001,
-    SYSTEM_CREATE_COMPLETE = 0x00000002,
-    SYSTEM_START_COMPLETE = 0x00000003,
-    SYSTEM_PAUSE_COMPLETE = 0x00000004,
-    SYSTEM_RESUME_COMPLETE = 0x00000005,
+    system_exit = 0x00000001,
+    system_create_complete = 0x00000002,
+    system_start_complete = 0x00000003,
+    system_pause_complete = 0x00000004,
+    system_resume_complete = 0x00000005,
 
     // Notifications for HCS_PROCESS handles
-    PROCESS_EXIT = 0x00010000,
+    process_exit = 0x00010000,
 
     // Common notifications
-    COMMON_INVALID = 0x00000000,
-    COMMON_SERVICE_DISCONNECT = 0x01000000
+    common_invalid = 0x00000000,
+    common_service_disconnect = 0x01000000
 };
 
 } // namespace
 
-#endif // NSPAWN_NOTIFICATIONTYPE_HPP
+#endif // NSPAWN_NOTIFICATION_TYPE_HPP

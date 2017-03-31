@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef NSPAWN_PROCESSCONFIG_HPP
-#define	NSPAWN_PROCESSCONFIG_HPP
+#ifndef NSPAWN_PROCESS_CONFIG_HPP
+#define	NSPAWN_PROCESS_CONFIG_HPP
 
 #include <string>
 #include <vector>
@@ -24,12 +24,12 @@
 #include "staticlib/ranges.hpp"
 #include "staticlib/serialization.hpp"
 
-#include "NSpawnException.hpp"
+#include "nspawn_exception.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
 
-class ProcessConfig {
+class process_config {
     std::string process_executable;
     std::vector<std::string> process_arguments;
     std::string mapped_directory;
@@ -37,7 +37,7 @@ class ProcessConfig {
 
 public:
 
-    ProcessConfig(const std::string& process_executable, const std::vector<std::string>& process_arguments,
+    process_config(const std::string& process_executable, const std::vector<std::string>& process_arguments,
             const std::string& mapped_directory, const std::string& stdout_filename) :
     process_executable(process_executable.data(), process_executable.length()),
     process_arguments(),
@@ -50,17 +50,17 @@ public:
         sr::emplace_to(this->process_arguments, std::move(ra));
     }
 
-    ProcessConfig(const ProcessConfig&) = delete;
+    process_config(const process_config&) = delete;
 
-    ProcessConfig& operator=(const ProcessConfig&) = delete;
+    process_config& operator=(const process_config&) = delete;
 
-    ProcessConfig(ProcessConfig&& other):
+    process_config(process_config&& other):
     process_executable(std::move(other.process_executable)),
     process_arguments(std::move(other.process_arguments)),
     mapped_directory(std::move(other.mapped_directory)),
     stdout_filename(std::move(stdout_filename)) { }
 
-    ProcessConfig& operator=(ProcessConfig&& other) {
+    process_config& operator=(process_config&& other) {
         process_executable = std::move(other.process_executable);
         process_arguments = std::move(other.process_arguments);
         mapped_directory = std::move(other.mapped_directory);
@@ -96,4 +96,4 @@ public:
 } // namespace
 
 
-#endif // NSPAWN_PROCESSCONFIG_HPP
+#endif // NSPAWN_PROCESS_CONFIG_HPP

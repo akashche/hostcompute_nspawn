@@ -19,7 +19,7 @@
 #include "staticlib/config.hpp"
 #include "staticlib/utils.hpp"
 
-#include "NSpawnException.hpp"
+#include "nspawn_exception.hpp"
 
 namespace { // anonymous
 
@@ -45,7 +45,7 @@ typedef uint32_t(*DestroyLayer_type)(DriverInfo* info, const wchar_t* id);
 HMODULE vmcomputelib() {
     static HMODULE lib = ::LoadLibraryW(su::widen("vmcompute").c_str());
     if (nullptr == lib) {
-        throw nspawn::NSpawnException(TRACEMSG("Cannot load 'vmcompute.dll' library," +
+        throw nspawn::nspawn_exception(TRACEMSG("Cannot load 'vmcompute.dll' library," +
                     " error: [" + su::errcode_to_string(::GetLastError()) + "]"));
     }
     return lib;
@@ -54,7 +54,7 @@ HMODULE vmcomputelib() {
 FARPROC lookupfun(const std::string& name) {
     FARPROC res = ::GetProcAddress(vmcomputelib(), name.c_str());
     if (nullptr == res) {
-        throw nspawn::NSpawnException(TRACEMSG("Cannot load function [" + name + "] from 'vmcompute.dll'"));
+        throw nspawn::nspawn_exception(TRACEMSG("Cannot load function [" + name + "] from 'vmcompute.dll'"));
     }
     return res;
 }

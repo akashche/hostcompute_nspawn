@@ -64,14 +64,14 @@ add_executable ( ${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/vmcompute.cpp
         # headers
         ${CMAKE_CURRENT_LIST_DIR}/include/hostcompute_nspawn.h
-        ${CMAKE_CURRENT_LIST_DIR}/src/CallbackLatch.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/ContainerConfig.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/ContainerId.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/ContainerLayer.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/NotificationType.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/NSpawnConfig.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/NSpawnException.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/ProcessConfig.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/callback_latch.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/container_config.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/container_id.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/container_layer.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/notification_type.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/nspawn_config.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/nspawn_exception.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/process_config.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/utils.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/vmcompute.hpp
         # resources

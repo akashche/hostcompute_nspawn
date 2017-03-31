@@ -15,8 +15,8 @@
  */
 
 
-#ifndef NSPAWN_CALLBACKLATCH_HPP
-#define	NSPAWN_CALLBACKLATCH_HPP
+#ifndef NSPAWN_CALLBACK_LATCH_HPP
+#define	NSPAWN_CALLBACK_LATCH_HPP
 
 #include <atomic>
 #include <mutex>
@@ -24,12 +24,12 @@
 
 #include "staticlib/config.hpp"
 
-#include "NotificationType.hpp"
-#include "NSpawnException.hpp"
+#include "notification_type.hpp"
+#include "nspawn_exception.hpp"
 
 namespace nspawn {
 
-class CallbackLatch {
+class callback_latch {
     std::mutex mutex;
     std::condition_variable system_create_cv;
     std::atomic<bool> system_create_flag = false;
@@ -41,33 +41,33 @@ class CallbackLatch {
     std::atomic<bool> process_exit_flag = false;
 
 public:
-    CallbackLatch() { }
+    callback_latch() { }
 
-    CallbackLatch(const CallbackLatch&) = delete;
+    callback_latch(const callback_latch&) = delete;
 
-    CallbackLatch& operator=(const CallbackLatch&) = delete;
+    callback_latch& operator=(const callback_latch&) = delete;
 
     void lock() {
         std::unique_lock<std::mutex> guard{ mutex };
         guard.release();
     }
 
-    void await(NotificationType nt) {
+    void await(notification_type nt) {
         switch (nt) {
-        case NotificationType::SYSTEM_CREATE_COMPLETE: await_internal(system_create_cv, system_create_flag); break;
-        case NotificationType::SYSTEM_START_COMPLETE: await_internal(system_start_cv, system_start_flag); break;
-        case NotificationType::SYSTEM_EXIT: await_internal(system_exit_cv, system_exit_flag); break;
-        case NotificationType::PROCESS_EXIT: await_internal(process_exit_cv, process_exit_flag); break;
-        default: throw NSpawnException(TRACEMSG("Unsupported notification type"));
+        case notification_type::system_create_complete: await_internal(system_create_cv, system_create_flag); break;
+        case notification_type::system_start_complete: await_internal(system_start_cv, system_start_flag); break;
+        case notification_type::system_exit: await_internal(system_exit_cv, system_exit_flag); break;
+        case notification_type::process_exit: await_internal(process_exit_cv, process_exit_flag); break;
+        default: throw nspawn_exception(TRACEMSG("Unsupported notification type"));
         }
     }
 
-    void unlock(NotificationType nt) {
+    void unlock(notification_type nt) {
         switch (nt) {
-        case NotificationType::SYSTEM_CREATE_COMPLETE: unlock_internal(system_create_cv, system_create_flag); break;
-        case NotificationType::SYSTEM_START_COMPLETE: unlock_internal(system_start_cv, system_start_flag); break;
-        case NotificationType::SYSTEM_EXIT: unlock_internal(system_exit_cv, system_exit_flag); break;
-        case NotificationType::PROCESS_EXIT: unlock_internal(process_exit_cv, process_exit_flag); break;
+        case notification_type::system_create_complete: unlock_internal(system_create_cv, system_create_flag); break;
+        case notification_type::system_start_complete: unlock_internal(system_start_cv, system_start_flag); break;
+        case notification_type::system_exit: unlock_internal(system_exit_cv, system_exit_flag); break;
+        case notification_type::process_exit: unlock_internal(process_exit_cv, process_exit_flag); break;
         default: { /* ignore */ }
         }
     }
@@ -95,5 +95,5 @@ private:
 
 } // namespace
 
-#endif // NSPAWN_CALLBACKLATCH_HPP
+#endif // NSPAWN_CALLBACK_LATCH_HPP
 

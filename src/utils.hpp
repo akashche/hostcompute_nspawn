@@ -22,7 +22,7 @@
 
 #include "staticlib/serialization.hpp"
 
-#include "NSpawnException.hpp"
+#include "nspawn_exception.hpp"
 
 namespace nspawn {
 namespace utils {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef NSPAWN_CONTAINERLAYER_HPP
-#define	NSPAWN_CONTAINERLAYER_HPP
+#ifndef NSPAWN_CONTAINER_LAYER_HPP
+#define	NSPAWN_CONTAINER_LAYER_HPP
 
 #include <cstdlib>
 #include <string>
@@ -25,33 +25,33 @@
 #include "staticlib/serialization.hpp"
 
 #include "vmcompute.hpp"
-#include "ContainerId.hpp"
-#include "NSpawnException.hpp"
+#include "container_id.hpp"
+#include "nspawn_exception.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
 
-class ContainerLayer {
+class container_layer {
     std::string base_path;
     std::wstring wpath;
-    ContainerId id;
+    container_id id;
 
 public:
-    ContainerLayer(const std::string& base_path, const std::string layer_name) :
+    container_layer(const std::string& base_path, const std::string layer_name) :
     base_path(base_path.data(), base_path.length()),
     wpath(staticlib::utils::widen(std::string(base_path) + layer_name)),
     id(layer_name) { }
 
-    ContainerLayer(const ContainerLayer&) = delete;
+    container_layer(const container_layer&) = delete;
 
-    ContainerLayer& operator=(const ContainerLayer&) = delete;
+    container_layer& operator=(const container_layer&) = delete;
 
-    ContainerLayer(ContainerLayer&& other) :
+    container_layer(container_layer&& other) :
         base_path(std::move(other.base_path)),
         wpath(std::move(other.wpath)),
         id(std::move(other.id)) { }
 
-    ContainerLayer& operator=(ContainerLayer&& other) {
+    container_layer& operator=(container_layer&& other) {
         base_path = std::move(other.base_path);
         wpath = std::move(other.wpath);
         id = std::move(other.id);
@@ -81,12 +81,12 @@ public:
         return res;
     }
 
-    ContainerLayer clone() const {
-        return ContainerLayer(base_path, id.get_name());
+    container_layer clone() const {
+        return container_layer(base_path, id.get_name());
     }
 
 };
 
 } // namespace
 
-#endif // NSPAWN_CONTAINERLAYER_HPP
+#endif // NSPAWN_CONTAINER_LAYER_HPP

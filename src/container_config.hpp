@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef NSPAWN_CONTAINERCONFIG_HPP
-#define	NSPAWN_CONTAINERCONFIG_HPP
+#ifndef NSPAWN_CONTAINER_CONFIG_HPP
+#define	NSPAWN_CONTAINER_CONFIG_HPP
 
 #include <string>
 #include <vector>
@@ -24,29 +24,29 @@
 #include "staticlib/ranges.hpp"
 #include "staticlib/serialization.hpp"
 
-#include "ContainerLayer.hpp"
-#include "NSpawnException.hpp"
+#include "container_layer.hpp"
+#include "nspawn_exception.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
 
-class ContainerConfig {
+class container_config {
     std::string name;
     std::string process_dir;
     uint32_t max_ram_mb = 0;
     uint16_t cpus_count = 0;
     std::string mapped_dir;
     std::string volume_path;
-    ContainerLayer own_layer;
-    std::vector<ContainerLayer> parent_layers;
+    container_layer own_layer;
+    std::vector<container_layer> parent_layers;
     std::string hostname;
 
 public:
 
-    ContainerConfig(const std::string& name, const std::string& process_dir,
+    container_config(const std::string& name, const std::string& process_dir,
             uint32_t max_ram_mb, uint16_t cpus_count,
-            const std::string& mapped_dir, const std::string& volume_path, ContainerLayer&& own_layer, 
-            const std::vector<ContainerLayer>& parent_layers, const std::string& hostname) :
+            const std::string& mapped_dir, const std::string& volume_path, container_layer&& own_layer, 
+            const std::vector<container_layer>& parent_layers, const std::string& hostname) :
     name(std::move(name)),
     process_dir(std::move(process_dir)),
     max_ram_mb(max_ram_mb),
@@ -57,17 +57,17 @@ public:
     parent_layers(),
     hostname(std::move(hostname)) {
         namespace sr = staticlib::ranges;
-        auto ra = sr::transform(sr::refwrap(parent_layers), [](const ContainerLayer& la) {
+        auto ra = sr::transform(sr::refwrap(parent_layers), [](const container_layer& la) {
             return la.clone();
         });
         sr::emplace_to(this->parent_layers, std::move(ra));
     }
 
-    ContainerConfig(const ContainerConfig&) = delete;
+    container_config(const container_config&) = delete;
 
-    ContainerConfig& operator=(const ContainerConfig&) = delete;
+    container_config& operator=(const container_config&) = delete;
 
-    ContainerConfig(ContainerConfig&& other):
+    container_config(container_config&& other):
     name(std::move(other.name)),
     process_dir(std::move(other.process_dir)),
     max_ram_mb(other.max_ram_mb),
@@ -81,7 +81,7 @@ public:
         other.cpus_count = 0;
     }
 
-    ContainerConfig& operator=(ContainerConfig&& other) {
+    container_config& operator=(container_config&& other) {
         name = std::move(other.name);
         process_dir = std::move(other.process_dir);
         max_ram_mb = other.max_ram_mb;
@@ -108,7 +108,7 @@ public:
             { "IgnoreFlushesDuringBoot", true },
             { "LayerFolderPath", own_layer.get_path() },
             { "Layers", [this]() -> std::vector<ss::json_value> {
-                auto ra = sr::transform(sr::refwrap(parent_layers), [](const ContainerLayer& la) {
+                auto ra = sr::transform(sr::refwrap(parent_layers), [](const container_layer& la) {
                     return la.to_json();
                 });
                 return ra.to_vector();
@@ -140,4 +140,4 @@ public:
 } // namespace
 
 
-#endif // NSPAWN_CONTAINERCONFIG_HPP
+#endif // NSPAWN_CONTAINER_CONFIG_HPP
