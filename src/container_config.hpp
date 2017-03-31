@@ -100,15 +100,16 @@ public:
             { "MemoryMaximumInMB", nconf->max_ram_mb },
             { "ProcessorCount", nconf->cpus_count },
             { "ProcessorMaximum", nconf->max_cpu_percent * 100 },
-            { "StorageIOPSMaximum", nconf->max_iops },
+            { "StorageIOPSMaximum", nconf->max_storage_iops },
+            { "StorageBandwidthMaximum", nconf->max_storage_bandwidth_bytes_per_sec },
             { "HostName", hostname },
             { "MappedDirectories", [this]() -> std::vector<ss::json_value> {
                 ss::json_value mappeddir = {
                     { "HostPath", nconf->process_directory },
                     { "ContainerPath", nconf->mapped_directory },
-                    { "ReadOnly", false },
-                    { "BandwidthMaximum", 0 },
-                    { "IOPSMaximum", nconf->max_iops },
+                    { "ReadOnly", false },                   
+                    { "IOPSMaximum", nconf->max_storage_iops },
+                    { "BandwidthMaximum", nconf->max_storage_bandwidth_bytes_per_sec },
                 };
                 std::vector<ss::json_value> res;
                 res.emplace_back(std::move(mappeddir));
