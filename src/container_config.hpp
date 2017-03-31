@@ -25,33 +25,25 @@
 #include "staticlib/serialization.hpp"
 
 #include "container_layer.hpp"
+#include "nspawn_config.hpp"
 #include "nspawn_exception.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
 
 class container_config {
+    staticlib::config::observer_ptr<const nspawn_config> nconf;
     std::string name;
-    std::string process_dir;
-    uint32_t max_ram_mb = 0;
-    uint16_t cpus_count = 0;
-    std::string mapped_dir;
     std::string volume_path;
     container_layer own_layer;
     std::vector<container_layer> parent_layers;
     std::string hostname;
 
 public:
-
-    container_config(const std::string& name, const std::string& process_dir,
-            uint32_t max_ram_mb, uint16_t cpus_count,
-            const std::string& mapped_dir, const std::string& volume_path, container_layer&& own_layer, 
+    container_config(const nspawn_config& nconf, const std::string& name, const std::string& volume_path, container_layer&& own_layer,
             const std::vector<container_layer>& parent_layers, const std::string& hostname) :
+    nconf(nconf),
     name(std::move(name)),
-    process_dir(std::move(process_dir)),
-    max_ram_mb(max_ram_mb),
-    cpus_count(cpus_count),
-    mapped_dir(std::move(mapped_dir)),
     volume_path(std::move(volume_path)),
     own_layer(std::move(own_layer)),
     parent_layers(),
@@ -69,26 +61,18 @@ public:
 
     container_config(container_config&& other):
     name(std::move(other.name)),
-    process_dir(std::move(other.process_dir)),
-    max_ram_mb(other.max_ram_mb),
-    cpus_count(other.cpus_count),
-    mapped_dir(std::move(other.mapped_dir)),
+    nconf(other.nconf),
     volume_path(std::move(other.volume_path)),
     own_layer(std::move(other.own_layer)),
     parent_layers(std::move(other.parent_layers)),
     hostname(std::move(other.hostname)) {
-        other.max_ram_mb = 0;
-        other.cpus_count = 0;
+        other.nconf.reset();
     }
 
     container_config& operator=(container_config&& other) {
         name = std::move(other.name);
-        process_dir = std::move(other.process_dir);
-        max_ram_mb = other.max_ram_mb;
-        other.max_ram_mb = 0;
-        cpus_count = other.cpus_count;
-        other.cpus_count = 0;
-        mapped_dir = std::move(other.mapped_dir);
+        nconf = other.nconf;
+        other.nconf.reset();
         volume_path = std::move(other.volume_path);
         own_layer = std::move(other.own_layer);
         parent_layers = std::move(other.parent_layers);
@@ -113,13 +97,14 @@ public:
                 });
                 return ra.to_vector();
             }() },
-            { "ProcessorCount", cpus_count },
-            { "MemoryMaximumInMB", max_ram_mb },
+            { "ProcessorCount", nconf->cpus_count },
+            { "ProcessorMaximum", nconf->max_cpu_percent * 100 },
+            { "MemoryMaximumInMB", nconf->max_ram_mb },
             { "HostName", hostname },
             { "MappedDirectories", [this]() -> std::vector<ss::json_value> {
                 ss::json_value mappeddir = {
-                    { "HostPath", process_dir },
-                    { "ContainerPath", mapped_dir },
+                    { "HostPath", nconf->process_directory },
+                    { "ContainerPath", nconf->mapped_directory },
                     { "ReadOnly", false },
                     { "BandwidthMaximum", 0 },
                     { "IOPSMaximum", 0 },

@@ -5,6 +5,7 @@
 
     "max_ram_mb": 512,
     "cpus_count": 1,
+    "max_cpu_percent": 25,
 
     "mapped_directory": "c:/nspawndir",
     "stdout_filename": "nspawn_out.txt",
