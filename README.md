@@ -13,13 +13,12 @@ Current limitations:
  - no base images handling (not easy to solve as Windows images are not free, Docker can be used to pull the initial image)
  - no console support (`stdout` is redirected into the file inside mounted directory)
  - no networking support (should be easy to add)
- - no ~~RAM/CPU/~~IOPS limits (RAM/CPU now supported with `max_ram_mb` and `cpus_count`)
 
 Download
 --------
 
- - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/1.1/hostcompute_nspawn.exe) (0.6MB)
- - sha256: `84ed5ec2f235c4a4873d3f0f34f8d881714885d19a81838770b9f78730ae62b3`
+ - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/1.2/hostcompute_nspawn.exe) (0.6MB)
+ - sha256: `7630544ad0c73730005fb8850a9ab82fe24d4314e6c9ecdf11d7b13fbf4f067f`
 
 Usage example
 -------------
@@ -64,6 +63,9 @@ Specify the parameters in `config.json` file ([example](https://github.com/akash
  - `process_arguments`: arguments to executable
  - `max_ram_mb`: max amount of RAM in megabytes allowed
  - `cpus_count`: max number of CPU cores allowed (it looks like HCS doesn't actually enforce it)
+ - `max_cpu_percent`: CPU maximum usage percent
+ - `max_storage_iops`: maximum storage [IOPS](https://en.wikipedia.org/wiki/IOPS)
+ - `max_storage_bandwidth_bytes_per_sec`: maximum storage bandwidth in bytes per second
  - `mapped_directory`: mount point for `process_directory` inside the container
  - `stdout_filename`: relative path to `stdout` file that will be written into `process_directory`
 
@@ -101,8 +103,8 @@ Visual Studio development command prompt
     cd hostcompute_nspawn
     mkdir build
     cd build
-    cmake ..
-    msbuild hostcompute_nspawn.sln
+    cmake .. -G "Visual Studio 12 2013 Win64"
+    cmake --build .
 
 License information
 -------------------
@@ -111,6 +113,12 @@ This project is released under the [Apache License 2.0](http://www.apache.org/li
 
 Changelog
 ---------
+
+**2017-03-31**
+
+ * version  `1.2`
+ * support for CPU load, IOPS and storage bandwidth
+ * deps update
 
 **2017-01-31**
 
