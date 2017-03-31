@@ -85,7 +85,7 @@ private:
     }
 
     void unlock_internal(std::condition_variable& cv, std::atomic<bool>& flag) {
-        static bool the_false = false;
+        bool the_false = false;
         if (flag.compare_exchange_strong(the_false, true)) {
             std::unique_lock<std::mutex> guard{mutex};
             cv.notify_all();
