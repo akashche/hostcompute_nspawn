@@ -19,9 +19,12 @@
 [submodule "deps/staticlib_utils"]
 	path = deps/staticlib_utils
 	url = https://github.com/staticlibs/staticlib_utils.git
-[submodule "deps/staticlib_serialization"]
-	path = deps/staticlib_serialization
-	url = https://github.com/staticlibs/staticlib_serialization.git
 [submodule "deps/staticlib_tinydir"]
 	path = deps/staticlib_tinydir
 	url = https://github.com/staticlibs/staticlib_tinydir.git
+[submodule "deps/staticlib_support"]
+	path = deps/staticlib_support
+	url = https://github.com/staticlibs/staticlib_support.git
+[submodule "deps/staticlib_json"]
+	path = deps/staticlib_json
+	url = https://github.com/staticlibs/staticlib_json.git
