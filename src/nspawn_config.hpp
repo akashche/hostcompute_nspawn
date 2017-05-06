@@ -18,6 +18,7 @@
 #define	NSPAWN_NSPAWN_CONFIG_HPP
 
 #include <algorithm>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -38,7 +39,8 @@ public:
     
     uint32_t max_ram_mb = 0;
     uint16_t cpus_count = 0;
-	uint16_t max_cpu_percent = 0;
+    uint16_t cpu_affinity_hex = 0;
+    uint16_t max_cpu_percent = 0;
     uint32_t max_storage_iops = 0;
     uint32_t max_storage_bandwidth_bytes_per_sec = 0;
 
@@ -57,7 +59,8 @@ public:
     process_arguments(std::move(other.process_arguments)),
     max_ram_mb(other.max_ram_mb),
     cpus_count(other.cpus_count),
-	max_cpu_percent(other.max_cpu_percent),
+    cpu_affinity_hex(other.cpu_affinity_hex),
+    max_cpu_percent(other.max_cpu_percent),
     max_storage_iops(other.max_storage_iops),
     max_storage_bandwidth_bytes_per_sec(other.max_storage_bandwidth_bytes_per_sec),
     mapped_directory(std::move(other.mapped_directory)),
@@ -65,6 +68,7 @@ public:
     parent_layer_directory(std::move(other.parent_layer_directory)) {
         other.max_ram_mb = 0;
         other.cpus_count = 0;
+        other.cpu_affinity_hex = 0;
     }
 
     nspawn_config& operator=(nspawn_config&& other) {
@@ -75,8 +79,10 @@ public:
         other.max_ram_mb = 0;
         cpus_count = other.cpus_count;
         other.cpus_count = 0;
-		max_cpu_percent = other.max_cpu_percent;
-		other.max_cpu_percent = 0;
+        cpu_affinity_hex = other.cpu_affinity_hex;
+        other.cpu_affinity_hex = 0;
+        max_cpu_percent = other.max_cpu_percent;
+        other.max_cpu_percent = 0;
         max_storage_iops = other.max_storage_iops;
         other.max_storage_iops = 0;
         max_storage_bandwidth_bytes_per_sec = other.max_storage_bandwidth_bytes_per_sec;
@@ -102,8 +108,10 @@ public:
                 max_ram_mb = fi.as_uint32_or_throw(name);
             } else if ("cpus_count" == name) {
                 cpus_count = fi.as_uint16_or_throw(name);
-			} else if ("max_cpu_percent" == name) {
-				max_cpu_percent = fi.as_uint16_or_throw(name);
+            } else if ("cpu_affinity_hex" == name) {
+                cpu_affinity_hex = fi.as_uint16_or_throw(name);
+            } else if ("max_cpu_percent" == name) {
+                max_cpu_percent = fi.as_uint16_or_throw(name);
             } else if ("max_storage_iops" == name) {
                 max_storage_iops = fi.as_uint32_or_throw(name);
             } else if ("max_storage_bandwidth_bytes_per_sec" == name) {
@@ -144,6 +152,7 @@ public:
 
             { "max_ram_mb", max_ram_mb },
             { "cpus_count", cpus_count },
+            { "cpu_affinity_hex", cpu_affinity_hex },
 			{ "max_cpu_percent", max_cpu_percent },
 
             { "mapped_directory", mapped_directory },
@@ -151,6 +160,12 @@ public:
 
             { "parent_layer_directory", parent_layer_directory }
         };
+    }
+
+    std::string cpu_affinity_hex_str() const {
+        std::stringstream ss;
+        ss << std::hex << cpu_affinity_hex;
+        return ss.str();
     }
 
 private:

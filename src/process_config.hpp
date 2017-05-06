@@ -24,47 +24,28 @@
 #include "staticlib/json.hpp"
 #include "staticlib/ranges.hpp"
 
+#include "nspawn_config.hpp"
 #include "nspawn_exception.hpp"
 #include "utils.hpp"
 
 namespace nspawn {
 
 class process_config {
-    std::string process_executable;
-    std::vector<std::string> process_arguments;
-    std::string mapped_directory;
-    std::string stdout_filename;
+    sl::support::observer_ptr<const nspawn_config> nconf;
 
 public:
-
-    process_config(const std::string& process_executable, const std::vector<std::string>& process_arguments,
-            const std::string& mapped_directory, const std::string& stdout_filename) :
-    process_executable(process_executable.data(), process_executable.length()),
-    process_arguments(),
-    mapped_directory(mapped_directory.data(), mapped_directory.length()),
-    stdout_filename(stdout_filename.data(), stdout_filename.length()) {
-        namespace sr = staticlib::ranges;
-        auto ra = sr::transform(sr::refwrap(process_arguments), [](const std::string& st) {
-            return std::string(st.data(), st.length());
-        });
-        sr::emplace_to(this->process_arguments, std::move(ra));
-    }
+    process_config(const nspawn_config& nconf) :
+    nconf(nconf) { }
 
     process_config(const process_config&) = delete;
 
     process_config& operator=(const process_config&) = delete;
 
-    process_config(process_config&& other):
-    process_executable(std::move(other.process_executable)),
-    process_arguments(std::move(other.process_arguments)),
-    mapped_directory(std::move(other.mapped_directory)),
-    stdout_filename(std::move(stdout_filename)) { }
+    process_config(process_config&& other) :
+    nconf(std::move(other.nconf)) { }
 
     process_config& operator=(process_config&& other) {
-        process_executable = std::move(other.process_executable);
-        process_arguments = std::move(other.process_arguments);
-        mapped_directory = std::move(other.mapped_directory);
-        stdout_filename = std::move(other.stdout_filename);
+        nconf = std::move(other.nconf);
         return *this;
     }
 
@@ -73,15 +54,16 @@ public:
             { "ApplicationName", "" }, 
             { "CommandLine", [this]() -> std::string {
                 auto cline = std::string("C:\\Windows\\System32\\cmd.exe /c ");
-                cline.append(mapped_directory).append("\\").append(process_executable);
-                for (auto& ar : process_arguments) {
+                cline.append("start /b /wait /affinity 0x").append(nconf->cpu_affinity_hex_str()).append(" ");
+                cline.append(nconf->mapped_directory).append("\\").append(nconf->process_executable);
+                for (auto& ar : nconf->process_arguments) {
                     cline.append(" ").append(ar);
                 }
-                cline.append(" >> ").append(stdout_filename).append(" 2>&1");
+                cline.append(" >> ").append(nconf->stdout_filename).append(" 2>&1");
                 return cline;
             }() },
             { "User", "" },
-            { "WorkingDirectory", mapped_directory },
+            { "WorkingDirectory", nconf->mapped_directory },
             { "Environment", std::vector<sl::json::field>() },
             { "EmulateConsole", false },
             { "CreateStdInPipe", false },

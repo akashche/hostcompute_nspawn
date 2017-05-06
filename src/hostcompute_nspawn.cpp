@@ -207,8 +207,7 @@ void hcs_enumerate_compute_systems() {
 
 HANDLE hcs_create_process(HANDLE compute_system, const nspawn_config& config) {
     HANDLE process = nullptr;
-    auto pcfg = process_config(config.process_executable, config.process_arguments, 
-            config.mapped_directory, config.stdout_filename);
+    auto pcfg = process_config(config);
     std::string pcfg_json = pcfg.to_json().dumps();
     std::cout << "Process config: " << pcfg_json << std::endl;
     std::wstring wpcfg_json = sl::utils::widen(pcfg_json);
