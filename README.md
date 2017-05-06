@@ -17,7 +17,7 @@ Current limitations:
 Download
 --------
 
- - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/1.3/hostcompute_nspawn.exe) (0.6MB)
+ - binary for Windows Server 2016: [hostcompute_nspawn.exe](https://github.com/akashche/hostcompute_nspawn/releases/download/v1.3/hostcompute_nspawn.exe) (0.6MB)
  - sha256: `a8bf6464380c59441ba9ddf383b017e553392bb17efca5a536ad1f49fbb4d744`
 
 Usage example
