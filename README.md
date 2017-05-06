@@ -63,6 +63,7 @@ Specify the parameters in `config.json` file ([example](https://github.com/akash
  - `process_arguments`: arguments to executable
  - `max_ram_mb`: max amount of RAM in megabytes allowed
  - `cpus_count`: max number of CPU cores allowed (it looks like HCS doesn't actually enforce it)
+ - `cpu_affinity_hex`: CPU affinity mask, allows to bind containerized process to specific CPUs, must be specified in decimal, used as hex mask
  - `max_cpu_percent`: CPU maximum usage percent
  - `max_storage_iops`: maximum storage [IOPS](https://en.wikipedia.org/wiki/IOPS)
  - `max_storage_bandwidth_bytes_per_sec`: maximum storage bandwidth in bytes per second
@@ -113,6 +114,11 @@ This project is released under the [Apache License 2.0](http://www.apache.org/li
 
 Changelog
 ---------
+
+**2017-05-06**
+
+ * version `1.3`
+ * CPU affinity support
 
 **2017-03-31**
 
