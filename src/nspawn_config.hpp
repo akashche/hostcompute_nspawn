@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
+#include "staticlib/json.hpp"
 #include "staticlib/ranges.hpp"
-#include "staticlib/serialization.hpp"
 
 #include "nspawn_exception.hpp"
 #include "utils.hpp"
@@ -87,9 +87,8 @@ public:
         return *this;
     }
 
-    nspawn_config(const staticlib::serialization::json_value& json) {
-        namespace ss = staticlib::serialization;
-        for (const ss::json_field& fi : json.as_object()) {
+    nspawn_config(const sl::json::value& json) {
+        for (const sl::json::field& fi : json.as_object()) {
             auto& name = fi.name();
             if ("process_directory" == name) {
                 process_directory = replace_slashes(fi.as_string_or_throw(name));
@@ -132,15 +131,13 @@ public:
             "Invalid 'config.json' specified, 'parent_layer_directory' must be non-empty"));
     }
 
-    staticlib::serialization::json_value to_json() const {
-        namespace sr = staticlib::ranges;
-        namespace ss = staticlib::serialization;
+    sl::json::value to_json() const {
         return {
             { "process_directory", process_directory },
             { "process_executable", process_executable },
-            { "process_arguments", [this]() -> std::vector<ss::json_value> {
-                auto args = sr::transform(sr::refwrap(process_arguments), [](const std::string& ar) {
-                    return ss::json_value(ar);
+            { "process_arguments", [this]() -> std::vector<sl::json::value> {
+                auto args = sl::ranges::transform(process_arguments, [](const std::string& ar) {
+                    return sl::json::value(ar);
                 });
                 return args.to_vector();
             }() },

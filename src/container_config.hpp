@@ -21,8 +21,9 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
+#include "staticlib/support.hpp"
+#include "staticlib/json.hpp"
 #include "staticlib/ranges.hpp"
-#include "staticlib/serialization.hpp"
 
 #include "container_layer.hpp"
 #include "nspawn_config.hpp"
@@ -32,7 +33,7 @@
 namespace nspawn {
 
 class container_config {
-    staticlib::config::observer_ptr<const nspawn_config> nconf;
+    sl::support::observer_ptr<const nspawn_config> nconf;
     std::string name;
     std::string volume_path;
     container_layer own_layer;
@@ -80,9 +81,7 @@ public:
         return *this;
     }
 
-    staticlib::serialization::json_value to_json() const {
-        namespace sr = staticlib::ranges;
-        namespace ss = staticlib::serialization;
+    sl::json::value to_json() const {
         return {
             { "SystemType", "Container" },
             { "Name", name },
@@ -91,8 +90,8 @@ public:
             { "VolumePath", volume_path },
             { "IgnoreFlushesDuringBoot", true },
             { "LayerFolderPath", own_layer.get_path() },
-            { "Layers", [this]() -> std::vector<ss::json_value> {
-                auto ra = sr::transform(sr::refwrap(parent_layers), [](const container_layer& la) {
+            { "Layers", [this]() -> std::vector<sl::json::value> {
+                auto ra = sl::ranges::transform(parent_layers, [](const container_layer& la) {
                     return la.to_json();
                 });
                 return ra.to_vector();
@@ -103,20 +102,20 @@ public:
             { "StorageIOPSMaximum", nconf->max_storage_iops },
             { "StorageBandwidthMaximum", nconf->max_storage_bandwidth_bytes_per_sec },
             { "HostName", hostname },
-            { "MappedDirectories", [this]() -> std::vector<ss::json_value> {
-                ss::json_value mappeddir = {
+            { "MappedDirectories", [this]() -> std::vector<sl::json::value> {
+                sl::json::value mappeddir = {
                     { "HostPath", nconf->process_directory },
                     { "ContainerPath", nconf->mapped_directory },
                     { "ReadOnly", false },                   
                     { "IOPSMaximum", nconf->max_storage_iops },
                     { "BandwidthMaximum", nconf->max_storage_bandwidth_bytes_per_sec },
                 };
-                std::vector<ss::json_value> res;
+                std::vector<sl::json::value> res;
                 res.emplace_back(std::move(mappeddir));
                 return res;
             }() },
             { "HvPartition", false },
-            { "EndpointList", std::vector<ss::json_value>() },
+            { "EndpointList", std::vector<sl::json::value>() },
             { "Servicing", false },
             { "AllowUnqualifiedDNSQuery", true }
         };

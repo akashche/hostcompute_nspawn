@@ -19,17 +19,8 @@
 #include <ctime>
 #include <chrono>
 
-#include "staticlib/utils.hpp"
-
 namespace nspawn {
 namespace utils {
-
-namespace { // anonymous
-
-namespace ss = staticlib::serialization;
-namespace su = staticlib::utils;
-
-} //namespace
 
 std::string current_datetime() {
     auto now = std::chrono::system_clock::now();

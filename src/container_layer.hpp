@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
-#include "staticlib/serialization.hpp"
+#include "staticlib/json.hpp"
 
 #include "vmcompute.hpp"
 #include "container_id.hpp"
@@ -66,7 +66,7 @@ public:
         return std::string(base_path) + id.get_name();
     }
 
-    staticlib::serialization::json_value to_json() const {
+    sl::json::value to_json() const {
         return {
             { "ID", id.to_id() },
             { "Path", get_path() }

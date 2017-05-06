@@ -21,8 +21,8 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
+#include "staticlib/json.hpp"
 #include "staticlib/ranges.hpp"
-#include "staticlib/serialization.hpp"
 
 #include "nspawn_exception.hpp"
 #include "utils.hpp"
@@ -68,8 +68,7 @@ public:
         return *this;
     }
 
-    staticlib::serialization::json_value to_json() const {
-        namespace ss = staticlib::serialization;
+    sl::json::value to_json() const {
         return {
             { "ApplicationName", "" }, 
             { "CommandLine", [this]() -> std::string {
@@ -83,12 +82,12 @@ public:
             }() },
             { "User", "" },
             { "WorkingDirectory", mapped_directory },
-            { "Environment", std::vector<ss::json_field>() },
+            { "Environment", std::vector<sl::json::field>() },
             { "EmulateConsole", false },
             { "CreateStdInPipe", false },
             { "CreateStdOutPipe", false },
             { "CreateStdErrPipe", false },
-            { "ConsoleSize", std::vector<ss::json_value>() }
+            { "ConsoleSize", std::vector<sl::json::value>() }
         };
     }
 };

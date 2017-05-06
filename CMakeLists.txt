@@ -32,14 +32,15 @@ endif ( )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/external_jansson )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/external_popt )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_config )
+staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_support )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_io )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_ranges )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_utils )
-staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_serialization )
+staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_json )
 staticlib_add_subdirectory ( ${STATICLIB_DEPS}/staticlib_tinydir )
 
 set ( ${PROJECT_NAME}_DEPS
-        staticlib_serialization
+        staticlib_json
         staticlib_tinydir
         staticlib_utils
         staticlib_ranges
@@ -47,7 +48,7 @@ set ( ${PROJECT_NAME}_DEPS
         staticlib_config
         jansson
         popt )
-staticlib_serialization_pkg_check_modules ( ${PROJECT_NAME}_DEPS_PC REQUIRED ${PROJECT_NAME}_DEPS )
+staticlib_pkg_check_modules ( ${PROJECT_NAME}_DEPS_PC REQUIRED ${PROJECT_NAME}_DEPS )
 
 # resources
 configure_file ( ${CMAKE_CURRENT_LIST_DIR}/resources/hostcompute_nspawn.rc

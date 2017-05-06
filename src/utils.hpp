@@ -18,9 +18,6 @@
 #define	NSPAWN_UTILS_HPP
 
 #include <string>
-#include <vector>
-
-#include "staticlib/serialization.hpp"
 
 #include "nspawn_exception.hpp"
 

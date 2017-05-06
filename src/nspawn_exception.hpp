@@ -19,14 +19,14 @@
 
 #include <string>
 
-#include "staticlib/config/staticlib_exception.hpp"
+#include "staticlib/support/exception.hpp"
 
 namespace nspawn {
 
 /**
  * Module specific exception
  */
-class nspawn_exception : public staticlib::config::staticlib_exception {
+class nspawn_exception : public sl::support::exception {
 public:
     /**
      * Default constructor
@@ -39,7 +39,7 @@ public:
      * @param msg error message
      */
     nspawn_exception(const std::string& msg) :
-    staticlib::config::staticlib_exception(msg) { }
+    sl::support::exception(msg) { }
 
 };
 

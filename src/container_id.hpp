@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "staticlib/config.hpp"
-#include "staticlib/serialization.hpp"
+#include "staticlib/json.hpp"
 
 #include "nspawn_exception.hpp"
 #include "vmcompute.hpp"
